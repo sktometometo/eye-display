@@ -1,14 +1,18 @@
-#include <M5Core2.h>
+#include <Arduino.h>
 #include <math.h>
-
-#define LGFX_M5STACK_CORE2
-#define LGFX_USE_V1
-#include <LovyanGFX.hpp>
-#include <LGFX_AUTODETECT.hpp>
 
 #include "eye.hpp"
 
-#define RIGHTEYE
+#define USE_ROS
+
+#define LGFX_USE_V1
+#include <LovyanGFX.hpp>
+
+#include "ArduinoHardware.h"
+#include "ros/node_handle.h"
+#include "geometry_msgs/Point.h"
+
+#define TFT_BL 10
 
 const int image_width = 139;
 const int image_height = 120;
@@ -19,59 +23,74 @@ const char path_image_outline_left[] = "/eye_outline_left_resized.jpg";
 const char path_image_pupil_left[] = "/eye_pupil_left_resized.jpg";
 const char path_image_reflex_left[] = "/eye_reflex_left_resized.jpg";
 
-static std::uint32_t count = 0;
-
 static Eye eye;
-#ifdef RIGHTEYE
-static EyeMaster eye_master;
-#else
-static EyeSlave eye_slave;
-#endif
+
+void callback(const geometry_msgs::Point& msg);
+
+ros::NodeHandle_<ArduinoHardware> nh;
+ros::Subscriber<geometry_msgs::Point> sub_point("~look_at", &callback);
+
+bool mode_right;
+
+float look_x = 0;
+float look_y = 0;
+
+void callback(const geometry_msgs::Point& msg)
+{
+  look_x = (float)msg.x;
+  look_y = (float)msg.y;
+}
 
 void setup()
 {
-  M5.begin(true, false, true, true);
+  pinMode(TFT_BL, OUTPUT);
+  digitalWrite(TFT_BL, HIGH);
+  Serial.begin(115200);
+
   SPIFFS.begin();
-#ifdef RIGHTEYE
-  eye.init(path_image_outline_right, path_image_pupil_right, path_image_reflex_right, image_width, image_height);
-#else
-  eye.init(path_image_outline_left, path_image_pupil_left, path_image_reflex_left, image_width, image_height);
-#endif
+
+#ifdef USE_ROS
+
+  nh.initNode();
+  nh.subscribe(sub_point);
+
+  while (not nh.connected())
+  {
+    nh.spinOnce();
+    delay(1000);
+  }
+
+  if (not nh.getParam("~mode_right", &mode_right))
+  {
+    mode_right = true;
+  }
+
+  if (mode_right)
+  {
+    eye.init(path_image_outline_right, path_image_pupil_right, path_image_reflex_right, image_width, image_height, 3);
+  }
+  else
+  {
+    eye.init(path_image_outline_left, path_image_pupil_left, path_image_reflex_left, image_width, image_height, 1);
+  }
   eye.update_look();
 
-  Serial.println("Initialized.");
+  nh.loginfo("Initialized.");
+#else
+  //  eye.init(path_image_outline_left, path_image_pupil_left, path_image_reflex_left, image_width, image_height, 3);
+  eye.init(path_image_outline_right, path_image_pupil_right, path_image_reflex_right, image_width, image_height, 1);
+  eye.update_look();
+#endif
 }
 
 void loop()
 {
-#ifdef RIGHTEYE
   delay(100);
-  float dx = cos(2 * M_PI * count / 20);
-  float dy = sin(2 * M_PI * count / 20);
-  eye.update_look(dx, dy);
-  auto ret = eye_master.send_update_look_args(dx, dy);
-  Serial.printf("Send %d bytes\n", ret);
-  count++;
+#ifdef USE_ROS
+  nh.loginfo("update.");
+  eye.update_look(look_x, look_y);
+  nh.spinOnce();
 #else
-  if (eye_slave.available())
-  {
-    float dx = 0;
-    float dy = 0;
-    float scale;
-    float random_scale;
-    if (eye_slave.receive_update_look_args(&dx, &dy, &scale, &random_scale))
-    {
-      eye.update_look(dx, dy);
-    }
-    else
-    {
-      Serial.println("Data receive failed.");
-    }
-  }
-  else
-  {
-    Serial.println("No data available");
-    delay(100);
-  }
+  eye.update_look(0, 0);
 #endif
 }
