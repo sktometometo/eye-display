@@ -1,16 +1,30 @@
+#include <math.h>
+
 #if defined(BOARD_TYPE_URUKATECH_001)
+
 #include <Arduino.h>
 #include <SPIFFS.h>
 #define LGFX_USE_V1
 #include <LovyanGFX.hpp>
+
+#elif defined(BOARD_TYPE_T_RGB)
+
+#include <Arduino.h>
+#include <SPIFFS.h>
+#include <TRGBSupport.h>
+#include <Arduino_GFX_Library.h>
+
 #elif defined(BOARD_TYPE_M5STACK_CORE2)
+
 #include <M5Core2.h>
 #define LGFX_USE_V1
 #include <LovyanGFX.hpp>
 #define LGFX_M5STACK_CORE2
 #include <LGFX_AUTODETECT.hpp>
+
 #endif
-#include <math.h>
+
+#if defined(BOARD_TYPE_URUKATECH_001)
 
 class LGFX_M5Stamp_SPI_GC9A01 : public lgfx::LGFX_Device
 {
@@ -86,18 +100,32 @@ public:
   }
 };
 
+#endif
+
 class Eye
 {
 private:
 #if defined(BOARD_TYPE_URUKATECH_001)
   LGFX_M5Stamp_SPI_GC9A01 lcd;
+#elif defined(BOARD_TYPE_T_RGB)
+  TRGBSuppport trgb;
+  Arduino_ESP32RGBPanel* bus;
+  Arduino_GFX* gfx;
 #elif defined(BOARD_TYPE_M5STACK_CORE2)
   LGFX lcd;
 #endif
+
+#if defined(BOARD_TYPE_URUKATEC_001) || defined(BOARD_TYPE_M5STACK_CORE2)
   LGFX_Sprite sprite_eye;
   LGFX_Sprite sprite_outline;
   LGFX_Sprite sprite_pupil;
   LGFX_Sprite sprite_reflex;
+#elif defined(BOARD_TYPE_T_RGB)
+  Arduino_Canvas canvas_eye;
+  Arduino_Canvas canvas_outline;
+  Arduino_Canavs canvas_pupil;
+  Arduino_Canvas canvas_reflex;
+#endif
 
   float zoom_ratio;
 
@@ -111,6 +139,7 @@ public:
     this->image_width = image_width;
     this->image_height = image_height;
 
+#if defined(BOARD_TYPE_URUKATEC_001) || defined(BOARD_TYPE_M5STACK_CORE2)
     lcd.init();
     lcd.setRotation(rotation);
 
@@ -127,25 +156,51 @@ public:
     sprite_reflex.fillScreen(TFT_WHITE);
     sprite_reflex.drawJpgFile(SPIFFS, path_jpg_reflex);
 
+    lcd.setPivot(lcd.width() >> 1, lcd.height() >> 1);
+    lcd.fillScreen(TFT_WHITE);
+#elif defined(BOARD_TYPE_T_RGB)
+    trgb.init();
+    bus = new Arduino_ESP32RGBPanel(
+        -1, -1, -1, EXAMPLE_PIN_NUM_DE, EXAMPLE_PIN_NUM_VSYNC, EXAMPLE_PIN_NUM_HSYNC, EXAMPLE_PIN_NUM_PCLK,
+        EXAMPLE_PIN_NUM_DATA1, EXAMPLE_PIN_NUM_DATA2, EXAMPLE_PIN_NUM_DATA3, EXAMPLE_PIN_NUM_DATA4,
+        EXAMPLE_PIN_NUM_DATA5, EXAMPLE_PIN_NUM_DATA6, EXAMPLE_PIN_NUM_DATA7, EXAMPLE_PIN_NUM_DATA8,
+        EXAMPLE_PIN_NUM_DATA9, EXAMPLE_PIN_NUM_DATA10, EXAMPLE_PIN_NUM_DATA11, EXAMPLE_PIN_NUM_DATA13,
+        EXAMPLE_PIN_NUM_DATA14, EXAMPLE_PIN_NUM_DATA15, EXAMPLE_PIN_NUM_DATA16, EXAMPLE_PIN_NUM_DATA17);
+    gfx = new Arduino_ST7701_RGBPanel(bus, GFX_NOT_DEFINED, 0 /* rotation */, false /* IPS */, 480, 480,
+                                      st7701_type2_init_operations, sizeof(st7701_type2_init_operations), true, 50, 1,
+                                      30, 20, 1, 30);
+
+    pinMode(EXAMPLE_PIN_NUM_BK_LIGHT, OUTPUT);
+    digitalWrite(EXAMPLE_PIN_NUM_BK_LIGHT, EXAMPLE_LCD_BK_LIGHT_ON_LEVEL);
+
+    gfx->begin();
+    trgb.tft_init();
+
+    canvas_eye = new ArduinoCanvas(image_width, image_height, this->gfx);
+    canvas_eye.fillScreen(WHITE);
+
+    canvas_outline = new ArduinoCanvas(image_width, image_height, this->gfx);
+#endif
+
     zoom_ratio = (float)lcd.width() / image_width;
     float ztmp = (float)lcd.height() / image_height;
     if (zoom_ratio > ztmp)
     {
       zoom_ratio = ztmp;
     }
-
-    lcd.setPivot(lcd.width() >> 1, lcd.height() >> 1);
-    lcd.fillScreen(TFT_WHITE);
   }
 
   void update_look(float dx = 0.0, float dy = 0.0, float scale = 10.0, float random_scale = 5.0)
   {
     long rx = (int)(random_scale * random(100) / 100);
     long ry = (int)(random_scale * random(100) / 100);
+#if defined(BOARD_TYPE_URUKATEC_001) || defined(BOARD_TYPE_M5STACK_CORE2)
     sprite_eye.fillScreen(TFT_WHITE);
     sprite_outline.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
     sprite_pupil.pushSprite(&sprite_eye, (int)(scale * dx), (int)(scale * dy), TFT_WHITE);
     sprite_reflex.pushSprite(&sprite_eye, (int)(scale * dx) + rx, (int)(scale * dy) + ry, TFT_WHITE);
     sprite_eye.pushRotateZoom(&lcd, lcd.width() >> 1, lcd.height() >> 1, 0, zoom_ratio, zoom_ratio, TFT_WHITE);
+#elif defined(BOARD_TYPE_T_RGB)
+#endif
   }
 };
