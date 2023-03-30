@@ -1,9 +1,16 @@
+#if defined(BOARD_TYPE_URUKATECH_001)
 #include <Arduino.h>
 #include <SPIFFS.h>
-#include <math.h>
-
 #define LGFX_USE_V1
 #include <LovyanGFX.hpp>
+#elif defined(BOARD_TYPE_M5STACK_CORE2)
+#include <M5Core2.h>
+#define LGFX_USE_V1
+#include <LovyanGFX.hpp>
+#define LGFX_M5STACK_CORE2
+#include <LGFX_AUTODETECT.hpp>
+#endif
+#include <math.h>
 
 class LGFX_M5Stamp_SPI_GC9A01 : public lgfx::LGFX_Device
 {
@@ -82,7 +89,11 @@ public:
 class Eye
 {
 private:
+#if defined(BOARD_TYPE_URUKATECH_001)
   LGFX_M5Stamp_SPI_GC9A01 lcd;
+#elif defined(BOARD_TYPE_M5STACK_CORE2)
+  LGFX lcd;
+#endif
   LGFX_Sprite sprite_eye;
   LGFX_Sprite sprite_outline;
   LGFX_Sprite sprite_pupil;
