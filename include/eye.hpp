@@ -1,4 +1,5 @@
 #include <math.h>
+#include <functional>
 
 #if defined(BOARD_TYPE_URUKATECH_001)
 
@@ -11,8 +12,12 @@
 
 #include <Arduino.h>
 #include <SPIFFS.h>
-#include <TRGBSupport.h>
+#include <Arduino_GFX.h>
 #include <Arduino_GFX_Library.h>
+#include <JpegFunc.h>
+#include <Wire.h>
+#define GFX_EXTRA_PRE_INIT() Wire.begin(8 /* SDA */, 48 /* SCL */, 800000L /* speed */);
+#define GFX_BL 46
 
 #elif defined(BOARD_TYPE_M5STACK_CORE2)
 
@@ -25,7 +30,6 @@
 #endif
 
 #if defined(BOARD_TYPE_URUKATECH_001)
-
 class LGFX_M5Stamp_SPI_GC9A01 : public lgfx::LGFX_Device
 {
   lgfx::Panel_GC9A01 _panel_instance;
@@ -99,7 +103,35 @@ public:
     setPanel(&_panel_instance);  // 使用するパネルをセットします。
   }
 };
+#elif defined(BOARD_TYPE_T_RGB)
+Arduino_DataBus* bus;
+Arduino_ESP32RGBPanel* rgbpanel;
+Arduino_RGB_Display* gfx;
+Arduino_Canvas* canvas_eye;
+Arduino_Canvas* canvas_outline;
+Arduino_Canvas* canvas_pupil;
+Arduino_Canvas* canvas_reflex;
 
+int jpegDrawCallback(Arduino_Canvas* canvas, JPEGDRAW* pDraw)
+{
+  canvas->draw16bitBeRGBBitmap(pDraw->x, pDraw->y, pDraw->pPixels, pDraw->iWidth, pDraw->iHeight);
+  return 1;
+}
+
+int jpegOutlineDrawCallback(JPEGDRAW* pDraw)
+{
+  return jpegDrawCallback(canvas_outline, pDraw);
+}
+
+int jpegPupilDrawCallback(JPEGDRAW* pDraw)
+{
+  return jpegDrawCallback(canvas_pupil, pDraw);
+}
+
+int jpegReflexDrawCallback(JPEGDRAW* pDraw)
+{
+  return jpegDrawCallback(canvas_reflex, pDraw);
+}
 #endif
 
 class Eye
@@ -107,10 +139,6 @@ class Eye
 private:
 #if defined(BOARD_TYPE_URUKATECH_001)
   LGFX_M5Stamp_SPI_GC9A01 lcd;
-#elif defined(BOARD_TYPE_T_RGB)
-  TRGBSuppport trgb;
-  Arduino_ESP32RGBPanel* bus;
-  Arduino_GFX* gfx;
 #elif defined(BOARD_TYPE_M5STACK_CORE2)
   LGFX lcd;
 #endif
@@ -120,11 +148,6 @@ private:
   LGFX_Sprite sprite_outline;
   LGFX_Sprite sprite_pupil;
   LGFX_Sprite sprite_reflex;
-#elif defined(BOARD_TYPE_T_RGB)
-  Arduino_Canvas canvas_eye;
-  Arduino_Canvas canvas_outline;
-  Arduino_Canavs canvas_pupil;
-  Arduino_Canvas canvas_reflex;
 #endif
 
   float zoom_ratio;
@@ -158,29 +181,6 @@ public:
 
     lcd.setPivot(lcd.width() >> 1, lcd.height() >> 1);
     lcd.fillScreen(TFT_WHITE);
-#elif defined(BOARD_TYPE_T_RGB)
-    trgb.init();
-    bus = new Arduino_ESP32RGBPanel(
-        -1, -1, -1, EXAMPLE_PIN_NUM_DE, EXAMPLE_PIN_NUM_VSYNC, EXAMPLE_PIN_NUM_HSYNC, EXAMPLE_PIN_NUM_PCLK,
-        EXAMPLE_PIN_NUM_DATA1, EXAMPLE_PIN_NUM_DATA2, EXAMPLE_PIN_NUM_DATA3, EXAMPLE_PIN_NUM_DATA4,
-        EXAMPLE_PIN_NUM_DATA5, EXAMPLE_PIN_NUM_DATA6, EXAMPLE_PIN_NUM_DATA7, EXAMPLE_PIN_NUM_DATA8,
-        EXAMPLE_PIN_NUM_DATA9, EXAMPLE_PIN_NUM_DATA10, EXAMPLE_PIN_NUM_DATA11, EXAMPLE_PIN_NUM_DATA13,
-        EXAMPLE_PIN_NUM_DATA14, EXAMPLE_PIN_NUM_DATA15, EXAMPLE_PIN_NUM_DATA16, EXAMPLE_PIN_NUM_DATA17);
-    gfx = new Arduino_ST7701_RGBPanel(bus, GFX_NOT_DEFINED, 0 /* rotation */, false /* IPS */, 480, 480,
-                                      st7701_type2_init_operations, sizeof(st7701_type2_init_operations), true, 50, 1,
-                                      30, 20, 1, 30);
-
-    pinMode(EXAMPLE_PIN_NUM_BK_LIGHT, OUTPUT);
-    digitalWrite(EXAMPLE_PIN_NUM_BK_LIGHT, EXAMPLE_LCD_BK_LIGHT_ON_LEVEL);
-
-    gfx->begin();
-    trgb.tft_init();
-
-    canvas_eye = new ArduinoCanvas(image_width, image_height, this->gfx);
-    canvas_eye.fillScreen(WHITE);
-
-    canvas_outline = new ArduinoCanvas(image_width, image_height, this->gfx);
-#endif
 
     zoom_ratio = (float)lcd.width() / image_width;
     float ztmp = (float)lcd.height() / image_height;
@@ -188,6 +188,41 @@ public:
     {
       zoom_ratio = ztmp;
     }
+#elif defined(BOARD_TYPE_T_RGB)
+    bus = new Arduino_XL9535SWSPI(8 /* SDA */, 48 /* SCL */, 2 /* XL PWD */, 3 /* XL CS */, 5 /* XL SCK */,
+                                  4 /* XL MOSI */);
+    rgbpanel = new Arduino_ESP32RGBPanel(
+        45 /* DE */, 41 /* VSYNC */, 47 /* HSYNC */, 42 /* PCLK */, 21 /* R0 */, 18 /* R1 */, 17 /* R2 */, 16 /* R3 */,
+        15 /* R4 */, 14 /* G0 */, 13 /* G1 */, 12 /* G2 */, 11 /* G3 */, 10 /* G4 */, 9 /* G5 */, 7 /* B0 */,
+        6 /* B1 */, 5 /* B2 */, 3 /* B3 */, 2 /* B4 */, 1 /* hsync_polarity */, 50 /* hsync_front_porch */,
+        1 /* hsync_pulse_width */, 30 /* hsync_back_porch */, 1 /* vsync_polarity */, 20 /* vsync_front_porch */,
+        1 /* vsync_pulse_width */, 30 /* vsync_back_porch */, 1 /* pclk_active_neg */);
+    gfx = new Arduino_RGB_Display(480 /* width */, 480 /* height */, rgbpanel, 0 /* rotation */, true /* auto_flush */,
+                                  bus, GFX_NOT_DEFINED /* RST */, st7701_type4_init_operations,
+                                  sizeof(st7701_type4_init_operations));
+
+    gfx->begin();
+
+    canvas_eye = new Arduino_Canvas(image_width, image_height, gfx);
+    canvas_eye->fillScreen(WHITE);
+
+    canvas_outline = new Arduino_Canvas(image_width, image_height, canvas_eye);
+    canvas_outline->fillScreen(WHITE);
+    jpegDraw(path_jpg_outline, jpegOutlineDrawCallback, true, 0, 0, image_width, image_height);
+    canvas_pupil = new Arduino_Canvas(image_width, image_height, canvas_eye);
+    canvas_pupil->fillScreen(WHITE);
+    jpegDraw(path_jpg_pupil, jpegPupilDrawCallback, true, 0, 0, image_width, image_height);
+    canvas_reflex = new Arduino_Canvas(image_width, image_height, canvas_eye);
+    canvas_reflex->fillScreen(WHITE);
+    jpegDraw(path_jpg_reflex, jpegReflexDrawCallback, true, 0, 0, image_width, image_height);
+
+    zoom_ratio = (float)gfx->width() / image_width;
+    float ztmp = (float)gfx->height() / image_height;
+    if (zoom_ratio > ztmp)
+    {
+      zoom_ratio = ztmp;
+    }
+#endif
   }
 
   void update_look(float dx = 0.0, float dy = 0.0, float scale = 10.0, float random_scale = 5.0)
@@ -201,6 +236,10 @@ public:
     sprite_reflex.pushSprite(&sprite_eye, (int)(scale * dx) + rx, (int)(scale * dy) + ry, TFT_WHITE);
     sprite_eye.pushRotateZoom(&lcd, lcd.width() >> 1, lcd.height() >> 1, 0, zoom_ratio, zoom_ratio, TFT_WHITE);
 #elif defined(BOARD_TYPE_T_RGB)
+    canvas_eye->fillScreen(WHITE);
+    canvas_outline->flush();
+    canvas_pupil->flush();
+    canvas_reflex->flush();
 #endif
   }
 };
