@@ -3,11 +3,9 @@
 
 #include "eye.hpp"
 
-/*
 #include "ArduinoHardware.h"
 #include "ros/node_handle.h"
 #include "geometry_msgs/Point.h"
-*/
 
 #if defined(BOARD_TYPE_URUKATECH_001)
 #define TFT_BL 10
@@ -31,7 +29,6 @@ static Eye eye;
 float look_x = 0;
 float look_y = 0;
 
-/*
 void callback(const geometry_msgs::Point& msg);
 
 ros::NodeHandle_<ArduinoHardware> nh;
@@ -42,9 +39,8 @@ void callback(const geometry_msgs::Point& msg)
   look_x = (float)msg.x;
   look_y = (float)msg.y;
 }
-*/
 
-TRGBSuppport trgb;  // DEBUG
+// TRGBSuppport trgb;  // DEBUG
 
 void setup()
 {
@@ -57,25 +53,20 @@ void setup()
 #endif
 
   SPIFFS.begin();
-  Serial.begin(115200);  // DEBUG
-  trgb.init();           // DEBUG
+  // Serial.begin(115200);  // DEBUG
+  // trgb.init();           // DEBUG
 
-  /*
   nh.initNode();
   nh.subscribe(sub_point);
   nh.spinOnce();
-  */
 
-  /*
   while (not nh.connected())
   {
     nh.spinOnce();
     delay(1000);
   }
-  */
 
   bool mode_right;
-  /*
   if (not nh.getParam("~mode_right", &mode_right))
   {
     eye.init(path_image_outline_right, path_image_pupil_right, path_image_reflex_right, image_width, image_height, 3);
@@ -84,9 +75,9 @@ void setup()
   {
     eye.init(path_image_outline_left, path_image_pupil_left, path_image_reflex_left, image_width, image_height, 1);
   }
-  */
-  eye.init(path_image_outline_right, path_image_pupil_right, path_image_reflex_right, image_width, image_height,
-           3);  // DEBUG
+
+  // // DEBUG
+  // eye.init(path_image_outline_right, path_image_pupil_right, path_image_reflex_right, image_width, image_height, 3);
   eye.update_look();
 
   // nh.loginfo("Initialized.");
@@ -95,8 +86,8 @@ void setup()
 void loop()
 {
   delay(100);
-  //  nh.loginfo("update.");
+  nh.loginfo("update.");
   eye.update_look(look_x, look_y);
-  // nh.spinOnce();
-  Serial.println("fuga");  // DEBUG
+  nh.spinOnce();
+  // Serial.println("fuga");  // DEBUG
 }
