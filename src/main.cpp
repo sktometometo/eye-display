@@ -67,11 +67,11 @@ void setup()
 
   if (mode_right)
   {
-    eye.init(path_image_outline_right, path_image_pupil_right, path_image_reflex_right, image_width, image_height, 3);
+    eye.init(path_image_outline_right, path_image_pupil_right, path_image_reflex_right, image_width, image_height, 1);
   }
   else
   {
-    eye.init(path_image_outline_left, path_image_pupil_left, path_image_reflex_left, image_width, image_height, 1);
+    eye.init(path_image_outline_left, path_image_pupil_left, path_image_reflex_left, image_width, image_height, 3);
   }
   eye.update_look();
 
