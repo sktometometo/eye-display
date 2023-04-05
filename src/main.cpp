@@ -65,7 +65,7 @@ void setup()
     mode_right = true;
   }
 
-  if (mode_right)
+  if (!mode_right)
   {
     eye.init(path_image_outline_right, path_image_pupil_right, path_image_reflex_right, image_width, image_height, 1);
   }
