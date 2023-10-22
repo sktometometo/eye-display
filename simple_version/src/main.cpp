@@ -47,11 +47,11 @@ void setup()
 
   delay(5000);
 
-  String mode = "left";
+  String mode = "right";
   if (mode == "right")
   {
     Serial.printf("aaa\n");
-    eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 3);
+    eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 1);
     Serial.printf("hello\n");
   }
   else
