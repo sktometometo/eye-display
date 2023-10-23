@@ -75,6 +75,7 @@ void setup()
 
   nh.initNode();
   nh.subscribe(sub_point);
+  nh.subscribe(sub_eye_status);
   nh.spinOnce();
 
   while (not nh.connected())
@@ -124,6 +125,7 @@ void loop()
     if (blink_level == max_blink_level){
       blink_level = 0;
       // eye_status = 0;
+      eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
     }
   }
 
