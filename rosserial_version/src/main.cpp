@@ -50,7 +50,9 @@ void callback_emotion(const std_msgs::UInt16 &msg);
 
 ros::NodeHandle_<ArduinoHardware> nh;
 ros::Subscriber<geometry_msgs::Point> sub_point("~look_at", &callback_look_at);
+// ros::Subscriber<std_msgs::UInt16> sub_eye_status("eye_status", &callback_emotion);
 ros::Subscriber<std_msgs::UInt16> sub_eye_status("eye_status", &callback_emotion);
+
 
 void callback_look_at(const geometry_msgs::Point &msg)
 {
@@ -85,13 +87,20 @@ void setup()
   }
 
   bool mode_right;
-  if (not nh.getParam("~mode_right", &mode_right))
+  nh.getParam("~mode_right", &mode_right);
+  // bool mode_right;
+  // if (not nh.getParam("~mode_right", &mode_right))
+  if (mode_right)
   {
+    // 右目
     eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 1);
+    // nh.loginfo("right eye mode_right: %s", &mode_right);
   }
   else
   {
+    // 左目
     eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 5);
+    // nh.loginfo("left eye mode_right: %s", &mode_right);
   }
   eye.update_look();
 }
@@ -100,16 +109,9 @@ static int i = 0;
 
 void loop()
 {
-  // delay(100);
-  // nh.loginfo("update.");
-  // eye.update_look(look_x, look_y);
-  // nh.spinOnce();
-
   delay(100);
   i++;
   
-  // float look_x = 2. * sin(i * 0.1);
-  // float look_y = 2. * cos(i * 0.1) - 2.;
   float look_x = 0.3 * sin(i * 0.1);
   float look_y = 0.3 * cos(i * 0.1) ;
 
@@ -124,7 +126,6 @@ void loop()
     blink_level += 1;
     if (blink_level == max_blink_level){
       blink_level = 0;
-      // eye_status = 0;
       eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
     }
   }
@@ -138,7 +139,6 @@ void loop()
     surprised_level += 1;
     if (surprised_level == max_surprised_level){
       surprised_level = 0;
-      // eye_status = 0;
       eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
     }
   }
@@ -149,7 +149,6 @@ void loop()
     sleepy_level += 1;
     if (sleepy_level == max_sleepy_level){
       sleepy_level = 0;
-      // eye_status = 0;
       eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
     }
   }
@@ -193,7 +192,6 @@ void loop()
     }
   }
 
-  eye.draw_updated_image();
   // nh.loginfo("look_x: %f, look_y: %f\n", look_x, look_y);
   // nh.loginfo()
 
