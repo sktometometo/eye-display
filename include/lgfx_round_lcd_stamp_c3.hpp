@@ -1,5 +1,7 @@
 #pragma once
 
+// Copied from https://github.com/urukakanko/M5Stamp_round_lcd
+
 #define LGFX_USE_V1
 #include <LovyanGFX.hpp>
 
