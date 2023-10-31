@@ -3,7 +3,12 @@
 
 #include "eye.hpp"
 
+#if defined(STAMPS3)
+#include "ArduinoHWCDCHardware.h"
+#elif defined(STAMPC3)
 #include "ArduinoHardware.h"
+#endif
+
 #include "ros/node_handle.h"
 #include "geometry_msgs/Point.h"
 #include "std_msgs/UInt16.h"

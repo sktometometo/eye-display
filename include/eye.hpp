@@ -4,7 +4,11 @@
 #include <Arduino.h>
 #include <SPIFFS.h>
 
+#if defined(STAMPS3)
+#include <lgfx_round_lcd_stamp_s3.hpp>
+#elif defined(STAMPC3)
 #include <lgfx_round_lcd_stamp_c3.hpp>
+#endif
 
 class Eye
 {
