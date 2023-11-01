@@ -4,8 +4,9 @@ Eye Display Example
 
 ## Supported devices
 
-- https://www.switch-science.com/products/8098
-
+1. Round Display Module with M5Stamp C3 (pio env name: `stampc3`) : https://www.switch-science.com/products/8098
+2. Round Display Module with M5Stamp S3 (pio env name: `stamps3`) : https://www.switch-science.com/products/8971
+- 
 ## How to use
 
 First you have to install ROS and PlatformIO
@@ -16,24 +17,24 @@ pip install platformio
 
 And then, you can build and upload the firmware to the device.
 
-For simple_version
+For simple_version and type 1 device (display module with m5stamp-c3)
 
 ```bash
 cd simple_version
-pio run
-pio run -t uploadfs --upload-port <port to device>
-pio run -t upload --upload-port <port to device>
+pio run -e stampc3
+pio run -e stampc3 -t uploadfs --upload-port <port to device>
+pio run -e stampc3 -t upload --upload-port <port to device>
 ```
 
 Then simple_version will work
 
-For rosserial_version
+For rosserial_version and type 2 device (display module with m5stamp-s3)
 
 ```bash
 cd rosserial_version
-pio run
-pio run -t uploadfs --upload-port <port to device>
-pio run -t upload --upload-port <port to device>
+pio run -e stamps3
+pio run -e stamps3 -t uploadfs --upload-port <port to device>
+pio run -e stamps3 -t upload --upload-port <port to device>
 ```
 
 And run serial node
