@@ -104,7 +104,7 @@ void setup()
   else
   {
     // 左目
-    eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 5);
+    eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 1);
     // nh.loginfo("left eye mode_right: %s", &mode_right);
   }
   eye.update_look();
