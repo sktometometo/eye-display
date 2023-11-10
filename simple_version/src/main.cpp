@@ -3,8 +3,6 @@
 
 #include "eye.hpp"
 
-#define TFT_BL 10
-
 const int image_width = 139;
 // const int image_height = 120;
 const int image_height = 139;
@@ -40,10 +38,17 @@ void setup()
 {
   Serial.begin(115200);
 
+#if defined(STAMPS3) or defined(STAMPC3)
+  const int TFT_BL = 10;
   pinMode(TFT_BL, OUTPUT);
   digitalWrite(TFT_BL, HIGH);
-
   SPIFFS.begin();
+#elif defined(ROUNDYPI)
+  // Storage.begin(17, SPI1);
+  SDFSConfig c2;
+  c2.setCSPin(17);
+  SDFS.setConfig(c2);
+#endif
 
   delay(5000);
 
@@ -161,6 +166,5 @@ void loop()
     }
   }
 
-  eye.draw_updated_image();
   Serial.printf("look_x: %f, look_y: %f\n", look_x, look_y);
 }
