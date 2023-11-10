@@ -44,10 +44,15 @@ void setup()
   digitalWrite(TFT_BL, HIGH);
   SPIFFS.begin();
 #elif defined(ROUNDYPI)
-  // Storage.begin(17, SPI1);
-  SDFSConfig c2;
-  c2.setCSPin(17);
-  SDFS.setConfig(c2);
+  Storage.begin(17, SPI1);
+  // SDFSConfig c2;
+  // c2.setCSPin(17);
+  // SDFS.setConfig(c2);
+  // SDFS.begin();
+  // LittleFSConfig cfg;
+  // cfg.setAutoFormat(false);
+  // LittleFS.setConfig(cfg);
+  // LittleFS.begin();
 #endif
 
   delay(5000);

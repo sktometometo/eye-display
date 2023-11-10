@@ -3,19 +3,28 @@
 
 #include <Arduino.h>
 
-#if defined(STAMPS3)
-#include <lgfx_round_lcd_stamp_s3.hpp>
-#include <SPIFFS.h>
-#define Storage SPIFFS
-#elif defined(STAMPC3)
-#include <lgfx_round_lcd_stamp_c3.hpp>
+#if defined(STAMPS3) or defined(STAMPC3)
 #include <SPIFFS.h>
 #define Storage SPIFFS
 #elif defined(ROUNDYPI)
-#include <lgfx_roundy_pi.hpp>
 #include <SD.h>
 #define Storage SD
+// #include <SDFS.h>
+// #define Storage SDFS
+// #include <LittleFS.h>
+// #define Storage LittleFS
 #endif
+
+#include <LovyanGFX.h>
+
+#if defined(STAMPS3)
+#include <lgfx_round_lcd_stamp_s3.hpp>
+#elif defined(STAMPC3)
+#include <lgfx_round_lcd_stamp_c3.hpp>
+#elif defined(ROUNDYPI)
+#include <lgfx_roundy_pi.hpp>
+#endif
+
 
 class Eye
 {
