@@ -6,7 +6,7 @@ Eye Display Example
 
 1. Round Display Module with M5Stamp C3 (pio env name: `stampc3`) : https://www.switch-science.com/products/8098
 2. Round Display Module with M5Stamp S3 (pio env name: `stamps3`) : https://www.switch-science.com/products/8971
-- 
+
 ## How to use
 
 First you have to install ROS and PlatformIO
@@ -54,3 +54,20 @@ You can control pupil position by publish a message to "/serial_node/look_at" to
 ```bash
 rostopic pub -1 /serial_node/look_at geometry_msgs/Point "{x: 1.0, y: 1.0, z: 0.0}"
 ```
+
+You can control emotion expression with eye by publishing a message to "/eye_status" topic.
+
+```bash
+rostopic pub -1 /eye_status std_msgs/UInt16 "data: 0"
+```
+The following table shows the correspondence between the data and the emotional expression of the eyes.
+| data | emotion |
+|---|---|
+|0| normal |
+|1| blink |
+|2| surprised |
+|3| sleepy |
+|4| angry |
+|5| sad / troubled |
+|6| happy |
+
