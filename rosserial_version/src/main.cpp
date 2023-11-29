@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <math.h>
 
-#include "eye.hpp"
+#include "kuromitsu_eye.hpp"
 
 #if defined(STAMPS3)
 #include "ArduinoHWCDCHardware.h"
@@ -19,26 +19,29 @@ const int image_width = 139;
 // const int image_height = 120;
 const int image_height = 139;
 
-const char path_image_eyeball[] = "/eyeball.jpg";
+const char path_image_eyeball[] = "/sclera.png";
 
-const char path_image_iris_right[] = "/iris_right.jpg";
-const char path_image_surprised_iris_right[] = "/iris_surprised_right.jpg";
-const char path_image_upperlid_right[] = "/upperlid.jpg";
-const char path_image_angry_upperlid_right[] = "/upperlid_leftside_down.jpg";
-const char path_image_sad_upperlid_right[] = "/upperlid_rightside_down.jpg";
-const char path_image_happy_upperlid_right[] = "/upperlid_happy_right.jpg";
+//const char path_image_iris_right[] = "/iris_right.png";
+const char path_image_iris_right[] = "/iris.png";
+const char path_image_shine_iris_right[] = "/shine-iris.png";
+const char path_image_upperlid_right[] = "/eye-lid.png";
+const char path_image_angry_upperlid_right[] = "/serious-right.png";
+const char path_image_sad_upperlid_right[] = "/sad-right.png";
+const char path_image_happy_upperlid_right[] = "/laugh-right.png";
 
-const char path_image_iris_left[] = "/iris_left.jpg";
-const char path_image_surprised_iris_left[] = "/iris_surprised_left.jpg";
-const char path_image_upperlid_left[] = "/upperlid.jpg";
-const char path_image_angry_upperlid_left[] = "/upperlid_rightside_down.jpg";
-const char path_image_sad_upperlid_left[] = "/upperlid_leftside_down.jpg";
-const char path_image_happy_upperlid_left[] =  "/upperlid_happy_left.jpg";
+const char path_image_iris_left[] = "/iris.png";
+const char path_image_shine_iris_left[] = "/shine-iris.png";
+const char path_image_upperlid_left[] = "/eye-lid.png";
+const char path_image_angry_upperlid_left[] = "/serious-left.png";
+const char path_image_sad_upperlid_left[] = "/sad-left.png";
+const char path_image_happy_upperlid_left[] =  "/laugh-left.png";
+
+const char path_image_reflex[] = "/reflex.png";
 
 // eye_status ... 0: 通常, 1: 瞬き, 2: 驚き, 3: 眠い, 4: 怒る, 5: 悲しむ・困る, 6: 嬉しい...
 int eye_status = 0;
 int blink_level = 0; int max_blink_level = 6;
-int surprised_level = 0; int max_surprised_level = 16;
+int shine_level = 0; int max_shine_level = 16;
 int sleepy_level = 0; int max_sleepy_level = 10;
 int angry_level = 0; int max_angry_level = 20;
 int sad_level = 0; int max_sad_level = 20;
@@ -98,13 +101,13 @@ void setup()
   if (mode_right)
   {
     // 右目
-    eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 1);
+    eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, path_image_reflex, image_width, image_height, 1);
     // nh.loginfo("right eye mode_right: %s", &mode_right);
   }
   else
   {
     // 左目
-    eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 1);
+    eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, path_image_reflex, image_width, image_height, 1);
     // nh.loginfo("left eye mode_right: %s", &mode_right);
   }
   eye.update_look();
@@ -129,20 +132,20 @@ void loop()
     blink_level += 1;
     if (blink_level == max_blink_level){
       blink_level = 0;
-      eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
+      eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right,path_image_reflex);
     }
   }
 
   else if (eye_status == 2){
-    // 驚き
-    if (surprised_level == 0){
-      eye.ready_for_surprised_eye(path_image_surprised_iris_right);
+    // キラキラ
+    if (shine_level == 0){
+      eye.ready_for_shine_eye(path_image_upperlid_right,path_image_shine_iris_right);
     }
-    eye.surprised(look_x, look_y, surprised_level);
-    surprised_level += 1;
-    if (surprised_level == max_surprised_level){
-      surprised_level = 0;
-      eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
+    eye.shine(look_x, look_y, shine_level);
+    shine_level += 1;
+    if (shine_level == max_shine_level){
+      shine_level = 0;
+      eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right, path_image_reflex);
     }
   }
 
@@ -152,7 +155,7 @@ void loop()
     sleepy_level += 1;
     if (sleepy_level == max_sleepy_level){
       sleepy_level = 0;
-      eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
+      eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right, path_image_reflex);
     }
   }
 
@@ -165,7 +168,7 @@ void loop()
     angry_level += 1;
     if (angry_level == max_angry_level){
       angry_level = 0;
-      eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
+      eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right, path_image_reflex);
     }
   }
 
@@ -178,20 +181,20 @@ void loop()
     sad_level += 1;
     if (sad_level == max_sad_level){
       sad_level = 0;
-      eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
+      eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right,path_image_reflex);
     }
   }
 
   else if (eye_status == 6) {
     // 喜ぶ
     if (happy_level == 0){
-      eye.ready_for_happy_eye(path_image_happy_upperlid_right);
+      eye.ready_for_happy_eye(path_image_upperlid_right, path_image_happy_upperlid_right);
     }
     eye.happy(look_x, look_y, happy_level);
     happy_level += 1;
     if (happy_level == max_happy_level){
       happy_level = 0;
-      eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
+      eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right, path_image_reflex);
     }
   }
 
