@@ -23,6 +23,7 @@ const char path_image_eyeball[] = "/sclera.png";
 
 //const char path_image_iris_right[] = "/iris_right.png";
 const char path_image_iris_right[] = "/iris.png";
+const char path_image_upperlid_all[] = "/eye-lid-all.png";
 const char path_image_shine_iris_right[] = "/shine-iris.png";
 const char path_image_upperlid_right[] = "/eye-lid.png";
 const char path_image_angry_upperlid_right[] = "/serious-right.png";
@@ -132,7 +133,7 @@ void loop()
     blink_level += 1;
     if (blink_level == max_blink_level){
       blink_level = 0;
-      eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right,path_image_reflex);
+      eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_all,path_image_reflex);
     }
   }
 
