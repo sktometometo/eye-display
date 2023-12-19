@@ -1,0 +1,3 @@
+pio run -e stamps3
+pio run -e stamps3 -t uploadfs --upload-port <port to device>
+pio run -e stamps3 -t upload --upload-port <port to device>

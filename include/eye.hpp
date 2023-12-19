@@ -64,7 +64,7 @@ public:
     // 瞳孔を描写するSpriteを準備
     sprite_pupil.createSprite(image_width, image_height);
     sprite_pupil.fillScreen(TFT_WHITE);
-    sprite_pupil.fillCircle(50, 50, 30, TFT_BLACK);
+    sprite_pupil.fillCircle(58, 58, 30, TFT_BLACK);
     
     // 光の反射を描画するSpriteを準備
     sprite_reflex.createSprite(image_width, image_height);
@@ -76,7 +76,7 @@ public:
     lcd.fillScreen(TFT_WHITE);
 
     // zoom率を指定
-    zoom_ratio = (float)lcd.width() / image_width;
+    zoom_ratio = (float)lcd.width() / image_width ;
     float ztmp = (float)lcd.height() / image_height;
     
     if (zoom_ratio > ztmp)
@@ -93,7 +93,7 @@ public:
     Serial.println(success_load_iris_image);
 
     sprite_pupil.fillScreen(TFT_WHITE);
-    sprite_pupil.fillCircle(50, 50, 30, TFT_BLACK);
+    sprite_pupil.fillCircle(58, 58, 30, TFT_BLACK);
     
     sprite_reflex.fillScreen(TFT_WHITE);
     sprite_reflex.fillCircle(40, 40, 6, TFT_LIGHTGRAY);
@@ -111,17 +111,17 @@ public:
     Serial.println(success_load_iris_image);
 
     sprite_pupil.fillScreen(TFT_WHITE);
-    sprite_pupil.fillCircle(image_height / 2, image_width / 2, 15, TFT_BLACK);
+    sprite_pupil.fillCircle(image_height / 2, image_width / 2, 30, TFT_BLACK);
       
     sprite_reflex.fillScreen(TFT_WHITE);
-    sprite_reflex.fillCircle(image_height / 2, image_width / 2, 7, TFT_LIGHTGRAY);
+    sprite_reflex.fillCircle(image_height / 2, image_width / 2, 20, TFT_LIGHTGRAY);
   }
 
   // 怒った目を描画する準備
   void ready_for_angry_eye(const char *path_jpg_angry_upperlid = "/white.jpg")
   {
     sprite_upperlid.fillScreen(TFT_WHITE);
-    const bool success_load_angry_upperlid_image = sprite_upperlid.drawJpgFile(SPIFFS, path_jpg_angry_upperlid);
+    const bool success_load_angry_upperlid_image = sprite_upperlid.drawPngFile(SPIFFS, path_jpg_angry_upperlid);
     Serial.println("angry_eye");
     Serial.println(success_load_angry_upperlid_image);
   }
@@ -130,7 +130,7 @@ public:
   void ready_for_sad_eye(const char *path_jpg_sad_upperlid = "/white.jpg")
   {
     sprite_upperlid.fillScreen(TFT_WHITE);
-    const bool success_load_sad_upperlid_image = sprite_upperlid.drawJpgFile(SPIFFS, path_jpg_sad_upperlid);
+    const bool success_load_sad_upperlid_image = sprite_upperlid.drawPngFile(SPIFFS, path_jpg_sad_upperlid);
     Serial.println("sad_eye");
     Serial.println(success_load_sad_upperlid_image);
   }
@@ -142,6 +142,39 @@ public:
     const bool success_load_happy_upperlid_image = sprite_upperlid.drawJpgFile(SPIFFS, path_jpg_happy_upperlid);
     Serial.println("happy_eye");
     Serial.println(success_load_happy_upperlid_image);
+  }
+
+  // 困っている目を描画する準備
+  void ready_for_troubled_eye(const char *path_jpg_troubled_upperlid = "/white.jpg")
+  {
+    sprite_upperlid.fillScreen(TFT_WHITE);
+    const bool success_load_troubled_upperlid_image = sprite_upperlid.drawJpgFile(SPIFFS, path_jpg_troubled_upperlid);
+    Serial.println("troubled_eye");
+    Serial.println(success_load_troubled_upperlid_image);
+  }
+
+  // とても嬉しい目を描画する準備
+  void ready_for_delighted_eye(const char *path_jpg_delighted_upperlid = "/white.jpg")
+  {
+    sprite_upperlid.fillScreen(TFT_WHITE);
+    const bool success_load_delighted_upperlid_image = sprite_upperlid.drawJpgFile(SPIFFS, path_jpg_delighted_upperlid);
+    Serial.println("delighted_eye");
+    Serial.println(success_load_delighted_upperlid_image);
+  }
+
+  // 期待する目を描画する準備
+  void ready_for_expecting_eye(const char *path_jpg_iris = "/white.jpg", const char *path_jpg_upperlid = "/white.jpg")
+  {
+    sprite_iris.fillScreen(TFT_WHITE);
+    const bool success_load_iris_image = sprite_iris.drawJpgFile(SPIFFS, path_jpg_iris);
+    Serial.println(success_load_iris_image);
+    
+    sprite_reflex.fillScreen(TFT_WHITE);
+    sprite_reflex.fillCircle(image_height / 2, 45, 23, TFT_LIGHTGRAY);
+    sprite_reflex.fillCircle(image_height / 2, 100, 15, TFT_LIGHTGRAY);
+
+    sprite_upperlid.fillScreen(TFT_WHITE);
+    sprite_upperlid.drawJpgFile(SPIFFS, path_jpg_upperlid); 
   }
 
   // 通常の目の描画
@@ -157,7 +190,7 @@ public:
 
     sprite_pupil.pushSprite(&sprite_eye, (int)(scale * dx), (int)(scale * dy), TFT_WHITE); // 瞳孔をランダムに動かす
     sprite_reflex.pushSprite(&sprite_eye, (int)(scale * dx) + rx, (int)(scale * dy) + ry, TFT_WHITE); // 光の反射をランダムに動かす
-    sprite_upperlid.pushSprite(&sprite_eye, 0, -130, TFT_WHITE); 
+    sprite_upperlid.pushSprite(&sprite_eye, 0, -140, TFT_WHITE); 
 
     sprite_eye.pushRotateZoom(&lcd, lcd.width() >> 1, lcd.height() >> 1, 0, zoom_ratio, zoom_ratio, TFT_WHITE); // sprite_eye をlcdに一括転送
   }
@@ -165,7 +198,7 @@ public:
   // 瞬きの描画
   void blink_eye(float dx = 0.0, float dy = 0.0, int blink_level = 0 /*何コマ目か*/, float scale = 10.0, float random_scale = 5.0)
   {
-    int upperlid_y_arr[] = {-130, -130, 0, 0, -130, -130}; // 上瞼のコマ送り時のy座標の配列
+    int upperlid_y_arr[] = {-150, -150, 0, 0, -150, -150, -150, -150, -150}; // 上瞼のコマ送り時のy座標の配列
     long rx = (int)(random_scale * random(100) / 100);
     long ry = (int)(random_scale * random(100) / 100);
     
@@ -186,7 +219,7 @@ public:
   // 驚きの目の描画
   void surprised(float dx = 0.0, float dy = 0.0, int surprised_level = 0 /*何コマ目か*/,  float scale = 10.0, float random_scale = 5.0)
   {
-    int upperlid_y_arr[] = {- 130, - 130, -130, -130, 0, 0, -130, -130, -130, -130, 0, -130, -130, 0, -130, -130};
+    int upperlid_y_arr[] = {- 150, - 150, -150, -150, 0, 0, -150, -150, -150, -150, 0, -150, -150, 0, -150, -150};
     long rx = (int)(random_scale * random(100) / 100);
     long ry = (int)(random_scale * random(100) / 100);
 
@@ -194,7 +227,7 @@ public:
     sprite_eye.fillScreen(TFT_WHITE);
     sprite_eyeball.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
 
-    sprite_iris.pushSprite(&sprite_eye, 0, 5, TFT_WHITE);
+    sprite_iris.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
     sprite_pupil.pushSprite(&sprite_eye, (int)(scale * dx), (int)(scale * dy), TFT_WHITE);
     sprite_reflex.pushSprite(&sprite_eye, (int)(scale * dx) + rx, (int)(scale * dy) + ry, TFT_WHITE);
     sprite_upperlid.pushSprite(&sprite_eye, 0, upperlid_y_arr[surprised_level], TFT_WHITE);
@@ -212,7 +245,7 @@ public:
     sprite_eye.clear();
     sprite_eye.fillScreen(TFT_WHITE);
     sprite_eyeball.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
-    sprite_iris.pushSprite(&sprite_eye, -10, 15, TFT_WHITE);
+    sprite_iris.pushSprite(&sprite_eye, 0, 10, TFT_WHITE);
     
     sprite_pupil.pushSprite(&sprite_eye, (int)(scale * dx) - 10, (int)(scale * dy) + 15, TFT_WHITE);
     sprite_upperlid.pushSprite(&sprite_eye, 0, upperlid_y_arr[sleepy_level]);
@@ -272,4 +305,52 @@ public:
 
     sprite_eye.pushRotateZoom(&lcd, lcd.width() >> 1, lcd.height() >> 1, 0, zoom_ratio, zoom_ratio, TFT_WHITE);
   }
+
+  // 困った目の描画
+  void troubled(float dx = 0.0, float dy = 0.0, int troubled_level = 0, float scale = 10.0, float random_scale = 5.0)
+  {
+    long rx = (int)(random_scale * random(100) / 100);
+    long ry = (int)(random_scale * random(100) / 100);
+    
+    sprite_eye.clear();
+    sprite_eye.fillScreen(TFT_WHITE);
+    sprite_eyeball.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
+    
+    sprite_upperlid.pushSprite(&sprite_eye, rx, ry, TFT_WHITE);
+
+    sprite_eye.pushRotateZoom(&lcd, lcd.width() >> 1, lcd.height() >> 1, 0, zoom_ratio, zoom_ratio, TFT_WHITE);
+  }
+
+  // とても嬉しい目の描画
+  void delighted(float dx = 0.0, float dy = 0.0, int delighted_level = 0, float scale = 10.0, float random_scale = 5.0)
+  {
+    long rx = (int)(random_scale * random(100) / 100);
+    long ry = (int)(random_scale * random(100) / 100);
+    
+    sprite_eye.clear();
+    sprite_eye.fillScreen(TFT_WHITE);
+    sprite_eyeball.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
+    
+    sprite_upperlid.pushSprite(&sprite_eye, rx - 3, ry, TFT_WHITE);
+
+    sprite_eye.pushRotateZoom(&lcd, lcd.width() >> 1, lcd.height() >> 1, 0, zoom_ratio, zoom_ratio, TFT_WHITE);
+  }
+
+  // 期待している目の描画
+  void expecting(float dx = 0.0, float dy = 0.0, int delighted_level = 0, float scale = 10.0, float random_scale = 5.0)
+  {
+    long rx = (int)(random_scale * random(100) / 100);
+    long ry = (int)(random_scale * random(100) / 100);
+
+    sprite_eye.clear();
+    sprite_eye.fillScreen(TFT_WHITE);
+    
+    sprite_eyeball.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
+    
+    sprite_iris.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
+    sprite_reflex.pushSprite(&sprite_eye, (int)(scale * dx) + rx, (int)(scale * dy) + ry, TFT_WHITE);
+    sprite_upperlid.pushSprite(&sprite_eye, 0, -140, TFT_WHITE); 
+    sprite_eye.pushRotateZoom(&lcd, lcd.width() >> 1, lcd.height() >> 1, 0, zoom_ratio, zoom_ratio, TFT_WHITE);
+  } 
+
 };

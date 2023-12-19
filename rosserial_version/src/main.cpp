@@ -21,29 +21,28 @@ const int image_height = 139;
 
 const char path_image_eyeball[] = "/eyeball.jpg";
 
-const char path_image_iris_right[] = "/iris_right.jpg";
+// const char path_image_iris_right[] = "/iris_right.jpg";
+const char path_image_iris_right[] = "/kashiwagi_iris.jpg";
 const char path_image_surprised_iris_right[] = "/iris_surprised_right.jpg";
-const char path_image_upperlid_right[] = "/upperlid.jpg";
-const char path_image_angry_upperlid_right[] = "/upperlid_leftside_down.jpg";
-const char path_image_sad_upperlid_right[] = "/upperlid_rightside_down.jpg";
+const char path_image_upperlid_right[] ="/kashiwagi_upperlid.jpg";
+//const char path_image_upperlid_right[] = "/kashiwagi_upperlid.jpg";
+const char path_image_angry_upperlid_right[] = "/upperlid_leftside_down.png";
+const char path_image_sad_upperlid_right[] = "/upperlid_rightside_down.png";
 const char path_image_happy_upperlid_right[] = "/upperlid_happy_right.jpg";
-
-const char path_image_iris_left[] = "/iris_left.jpg";
-const char path_image_surprised_iris_left[] = "/iris_surprised_left.jpg";
-const char path_image_upperlid_left[] = "/upperlid.jpg";
-const char path_image_angry_upperlid_left[] = "/upperlid_rightside_down.jpg";
-const char path_image_sad_upperlid_left[] = "/upperlid_leftside_down.jpg";
-const char path_image_happy_upperlid_left[] =  "/upperlid_happy_left.jpg";
+const char path_image_troubled_upperlid_right[] = "/kashiwagi_troubled.jpg";
+const char path_image_delighted_upperlid_right[] = "/kashiwagi_delighted.jpg";
 
 // eye_status ... 0: 通常, 1: 瞬き, 2: 驚き, 3: 眠い, 4: 怒る, 5: 悲しむ・困る, 6: 嬉しい...
 int eye_status = 0;
-int blink_level = 0; int max_blink_level = 6;
+int blink_level = 0; int max_blink_level = 9;
 int surprised_level = 0; int max_surprised_level = 16;
 int sleepy_level = 0; int max_sleepy_level = 10;
 int angry_level = 0; int max_angry_level = 20;
 int sad_level = 0; int max_sad_level = 20;
-int happy_level = 0; int max_happy_level = 20;
-
+int happy_level = 0; int max_happy_level = 1;
+int troubled_level = 0; int max_troubled_level = 1;
+int delighted_level = 0; int max_delighted_level = 1;
+int expecting_level = 0; int max_expecting_level = 1;
 
 static Eye eye;
 
@@ -97,14 +96,14 @@ void setup()
   // if (not nh.getParam("~mode_right", &mode_right))
   if (mode_right)
   {
-    // 右目
-    eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 1);
+    // 左目 2
+    eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 2);
     // nh.loginfo("right eye mode_right: %s", &mode_right);
   }
   else
   {
-    // 左目
-    eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 1);
+    // 右目 6
+    eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 2);
     // nh.loginfo("left eye mode_right: %s", &mode_right);
   }
   eye.update_look();
@@ -136,7 +135,7 @@ void loop()
   else if (eye_status == 2){
     // 驚き
     if (surprised_level == 0){
-      eye.ready_for_surprised_eye(path_image_surprised_iris_right);
+      eye.ready_for_surprised_eye(path_image_iris_right);
     }
     eye.surprised(look_x, look_y, surprised_level);
     surprised_level += 1;
@@ -191,6 +190,45 @@ void loop()
     happy_level += 1;
     if (happy_level == max_happy_level){
       happy_level = 0;
+      eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
+    }
+  }
+  
+    else if (eye_status == 7) {
+    // 困る
+    if (troubled_level == 0){
+      eye.ready_for_troubled_eye(path_image_troubled_upperlid_right);
+    }
+    eye.troubled(look_x, look_y, troubled_level);
+    troubled_level += 1;
+    if (troubled_level == max_troubled_level){
+      troubled_level = 0;
+      eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
+    }
+    }
+
+    else if (eye_status == 8) {
+    // すごく嬉しい
+    if (delighted_level == 0){
+      eye.ready_for_troubled_eye(path_image_delighted_upperlid_right);
+    }
+    eye.delighted(look_x, look_y, delighted_level);
+    delighted_level += 1;
+    if (delighted_level == max_delighted_level){
+      delighted_level = 0;
+      eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
+    }
+  }
+
+    else if (eye_status == 9) {
+    // 期待している
+    if (expecting_level == 0){
+      eye.ready_for_expecting_eye(path_image_iris_right, path_image_upperlid_right);
+    }
+    eye.expecting(look_x, look_y, expecting_level);
+    expecting_level += 1;
+    if (expecting_level == max_expecting_level){
+      expecting_level = 0;
       eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
     }
   }
