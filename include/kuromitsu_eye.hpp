@@ -79,7 +79,7 @@ public:
 
     // zoom率を指定
     zoom_ratio = (float)lcd.width() / image_width;
-    float ztmp = (float)lcd.height() / image_height;
+    float ztmp = (float)lcd.height() / (image_height*1.2);
     
     if (zoom_ratio > ztmp)
     {
@@ -142,6 +142,19 @@ public:
     Serial.println(success_load_sad_upperlid_image);
   }
 
+
+    // 眠い目を描画する準備
+  void ready_for_sleepy_eye(const char *path_png_sleepy_upperlid = "/white.png", const char *path_png_sleepy_iris= "/white.png")
+  {
+    sprite_iris.clear(TFT_WHITE);
+    sprite_upperlid.clear();
+    sprite_upperlid.fillScreen(TFT_WHITE);
+    const bool success_load_sleepy_upperlid_image = sprite_upperlid.drawPngFile(SPIFFS, path_png_sleepy_upperlid);
+    const bool success_load_sleepy_iris_image = sprite_iris.drawPngFile(SPIFFS, path_png_sleepy_iris);
+    Serial.println("sleepy_eye");
+    Serial.println(success_load_sleepy_upperlid_image);
+  }
+
   // 喜んでいる目を描画する準備
   void ready_for_happy_eye(const char *path_png_happy_upperlid = "*/white.png", const char *path_png_happy_iris = "/white.png")
   {
@@ -153,11 +166,35 @@ public:
     Serial.println(success_load_happy_iris_image);
   }
 
+
+    // 悔しい目を描画する準備
+  void ready_for_flustrated_eye(const char *path_png_flustrated_upperlid = "*/white.png", const char *path_png_flustrated_iris = "/white.png")
+  {
+    sprite_upperlid.fillScreen(TFT_WHITE);
+    sprite_iris.fillScreen(TFT_WHITE);
+    const bool success_load_flustrated_upperlid_image = sprite_upperlid.drawPngFile(SPIFFS, path_png_flustrated_upperlid);
+    const bool success_load_flustrated_iris_image = sprite_iris.drawPngFile(SPIFFS, path_png_flustrated_iris);
+    Serial.println("flustrated_eye");
+    Serial.println(success_load_flustrated_iris_image);
+  }
+
+      // すねた目を描画する準備
+  void ready_for_boring_eye(const char *path_png_boring_upperlid = "*/white.png", const char *path_png_boring_iris = "/white.png")
+  {
+    sprite_upperlid.fillScreen(TFT_WHITE);
+    sprite_iris.fillScreen(TFT_WHITE);
+    const bool success_load_boring_upperlid_image = sprite_upperlid.drawPngFile(SPIFFS, path_png_boring_upperlid);
+    const bool success_load_boring_iris_image = sprite_iris.drawPngFile(SPIFFS, path_png_boring_iris);
+    Serial.println("boring_eye");
+    Serial.println(success_load_boring_iris_image);
+  }
+
+
   // 通常の目の描画
   void update_look(float dx = 0.0, float dy = 0.0, float scale = 10.0, float random_scale = 5.0)
   {
     long rx = (int)(random_scale * random(100) / 100);
-    long ry = (int)(random_scale * random(100) / 100);
+    long ry = (int)(random_scale * random(100) / 200);
 
     sprite_eye.clear();
     sprite_eye.fillScreen(TFT_WHITE);
@@ -245,7 +282,7 @@ public:
     
     sprite_upperlid.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
 
-    sprite_eye.pushRotateZoom(&lcd, lcd.width() >> 1, lcd.height() >> 1, 0, zoom_ratio, zoom_ratio, TFT_WHITE);
+    sprite_eye.pushRotateZoom(&lcd, lcd.width() >> 1, lcd.height() >> 1, 0, zoom_ratio, zoom_ratio);
   }
 
   // 悲しい目の描画
@@ -269,6 +306,37 @@ public:
 
   // 嬉しい目の描画
   void happy(float dx = 0.0, float dy = 0.0, int happy_level = 0, float scale = 10.0, float random_scale = 5.0)
+  {
+    long rx = (int)(random_scale * random(100) / 100);
+    long ry = (int)(random_scale * random(100) / 100);
+    
+    sprite_eye.clear();
+    sprite_eye.fillScreen(TFT_WHITE);
+    sprite_eyeball.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
+    sprite_upperlid.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
+    sprite_iris.pushSprite(&sprite_eye, rx, ry, TFT_WHITE);
+
+    sprite_eye.pushRotateZoom(&lcd, lcd.width() >> 1, lcd.height() >> 1, 0, zoom_ratio, zoom_ratio, TFT_WHITE);
+  }
+
+
+  // 悔しい目1の描画
+  void flustrated(float dx = 0.0, float dy = 0.0, int flustrated_level = 0, float scale = 10.0, float random_scale = 5.0)
+  {
+    long rx = (int)(random_scale * random(100) / 100);
+    long ry = (int)(random_scale * random(100) / 100);
+    
+    sprite_eye.clear();
+    sprite_eye.fillScreen(TFT_WHITE);
+    sprite_eyeball.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
+    sprite_upperlid.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
+    sprite_iris.pushSprite(&sprite_eye, rx, ry, TFT_WHITE);
+
+    sprite_eye.pushRotateZoom(&lcd, lcd.width() >> 1, lcd.height() >> 1, 0, zoom_ratio, zoom_ratio, TFT_WHITE);
+  }
+
+    // すねた目の描画
+  void boring(float dx = 0.0, float dy = 0.0, int flustrated_level = 0, float scale = 10.0, float random_scale = 5.0)
   {
     long rx = (int)(random_scale * random(100) / 100);
     long ry = (int)(random_scale * random(100) / 100);
