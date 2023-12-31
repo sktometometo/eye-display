@@ -71,7 +71,7 @@ public:
     // 光の反射を描画するSpriteを準備
     sprite_reflex.createSprite(image_width, image_height);
     sprite_reflex.fillScreen(TFT_WHITE);
-    sprite_reflex.fillCircle(40, 40, 6, TFT_LIGHTGRAY);
+    sprite_reflex.fillCircle(50, 50, 6, TFT_LIGHTGRAY);
     
     // lcdを準備
     lcd.setPivot(lcd.width() >> 1, lcd.height() >> 1);
@@ -102,7 +102,7 @@ public:
 
     
     sprite_reflex.fillScreen(TFT_WHITE);
-    sprite_reflex.fillCircle(40, 40, 6, TFT_LIGHTGRAY);
+    sprite_reflex.fillCircle(50, 50, 6, TFT_LIGHTGRAY);
     
     sprite_upperlid.fillScreen(TFT_WHITE);
     sprite_upperlid.drawJpgFile(SPIFFS, path_jpg_upperlid); 
@@ -165,7 +165,7 @@ public:
     
  
     sprite_reflex.pushSprite(&sprite_eye, (int)(scale * dx) + rx, (int)(scale * dy) + ry, TFT_WHITE); // 光の反射をランダムに動かす
-    sprite_upperlid.pushSprite(&sprite_eye, -130, 0, TFT_WHITE); 
+    sprite_upperlid.pushSprite(&sprite_eye, 0, -130, TFT_WHITE); 
 
     sprite_eye.pushRotateZoom(&lcd, lcd.width() >> 1, lcd.height() >> 1, 0, zoom_ratio, zoom_ratio, TFT_WHITE); // sprite_eye をlcdに一括転送
   }
