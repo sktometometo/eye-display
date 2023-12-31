@@ -21,7 +21,7 @@ const int image_height = 139;
 
 const char path_image_eyeball[] = "/eyeball.jpg";
 
-const char path_image_iris_right[] = "/iris_right.jpg";
+const char path_image_iris_right[] = "/tear.jpeg";
 const char path_image_surprised_iris_right[] = "/iris_surprised_right.jpg";
 const char path_image_upperlid_right[] = "/upperlid.jpg";
 const char path_image_angry_upperlid_right[] = "/upperlid_leftside_down.jpg";
@@ -98,15 +98,15 @@ void setup()
   // bool mode_right;
   // if (not nh.getParam("~mode_right", &mode_right))
   if (mode_right)
-  {
+    {//left_eyeﾃﾞﾊ6ﾆｽﾙ
     // 右目
-    eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 6);
+    eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 8);
     // nh.loginfo("right eye mode_right: %s", &mode_right);
   }
   else
   {
     // 左目
-    eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 6);
+    eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 8);
     // nh.loginfo("left eye mode_right: %s", &mode_right);
   }
   eye.update_look();
@@ -174,7 +174,7 @@ void loop()
   else if (eye_status == 5){
     // 悲しむ・困る
     if (sad_level == 0){
-      eye.ready_for_sad_eye(path_image_sad_upperlid_right);
+      eye.ready_for_sad_eye(path_image_iris_right, path_image_sad_upperlid_right);
     }
     eye.sad(look_x, look_y, sad_level);
     sad_level += 1;

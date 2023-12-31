@@ -132,10 +132,16 @@ public:
   }
 
   // 悲しい目を描画する準備
-  void ready_for_sad_eye(const char *path_jpg_sad_upperlid = "/white.jpg")
+  void ready_for_sad_eye(const char *path_jpg_sad_iris = "/white.jpg", const char *path_jpg_sad_upperlid = "/white.jpg")
   {
+    sprite_iris.fillScreen(TFT_WHITE);                                                                                     
+    const bool success_load_iris_image = sprite_iris.drawJpgFile(SPIFFS, path_jpg_sad_iris);                                
+    Serial.println(success_load_iris_image);     
+
     sprite_upperlid.fillScreen(TFT_WHITE);
     const bool success_load_sad_upperlid_image = sprite_upperlid.drawJpgFile(SPIFFS, path_jpg_sad_upperlid);
+    
+    
     Serial.println("sad_eye");
     Serial.println(success_load_sad_upperlid_image);
   }
@@ -264,7 +270,7 @@ public:
     sprite_eye.clear();
     sprite_eye.fillScreen(TFT_WHITE);
     sprite_eyeball.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
-    //sprite_iris.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
+    sprite_iris.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
     
     sprite_pupil.pushSprite(&sprite_eye, (int)(scale * dx), (int)(scale * dy), TFT_WHITE); // 瞳孔をランダムに動かす
     sprite_reflex.pushSprite(&sprite_eye, (int)(scale * dx) + rx, (int)(scale * dy) + ry + 10, TFT_WHITE); // 光の反射をランダムに動かす
