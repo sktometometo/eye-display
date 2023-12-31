@@ -28,6 +28,7 @@ const char path_image_angry_upperlid_right[] = "/upperlid_leftside_down.jpg";
 const char path_image_sad_upperlid_right[] = "/upperlid_rightside_down.jpg";
 const char path_image_happy_upperlid_right[] = "/upperlid_star2.jpeg";
   //"/upperlid_happy_right.jpg";
+const char path_image_heart_upperlid_right[] = "/upperlid_heart2.jpeg";   
 
 const char path_image_iris_left[] = "/iris_left.jpg";
 const char path_image_surprised_iris_left[] = "/iris_surprised_left.jpg";
@@ -44,7 +45,7 @@ int sleepy_level = 0; int max_sleepy_level = 10;
 int angry_level = 0; int max_angry_level = 20;
 int sad_level = 0; int max_sad_level = 20;
 int happy_level = 0; int max_happy_level = 20;
-
+int heart_level = 0; int max_heart_level = 20;
 
 static Eye eye;
 
@@ -192,6 +193,19 @@ void loop()
     happy_level += 1;
     if (happy_level == max_happy_level){
       happy_level = 0;
+      eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
+    }
+  }
+
+  else if (eye_status == 7) {
+    // heart
+    if (heart_level == 0){
+      eye.ready_for_heart_eye(path_image_heart_upperlid_right);
+    }
+    eye.heart(look_x, look_y, heart_level);
+    heart_level += 1;
+    if (heart_level == max_heart_level){
+      heart_level = 0;
       eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
     }
   }

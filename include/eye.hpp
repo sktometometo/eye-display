@@ -55,12 +55,12 @@ public:
     const bool success_load_upperlid_image = sprite_upperlid.drawJpgFile(SPIFFS, path_jpg_upperlid); 
     Serial.println(success_load_upperlid_image); // 上瞼の画像がloadできていることを確認
 
-    /*    // 虹彩を描写するSpriteを準備
+        // 虹彩を描写するSpriteを準備
     sprite_iris.createSprite(image_width, image_height);
     sprite_iris.fillScreen(TFT_WHITE);
     const bool success_load_iris_image = sprite_iris.drawJpgFile(SPIFFS, path_jpg_iris);
     Serial.println(success_load_iris_image);
-    */
+    
     // 瞳孔を描写するSpriteを準備
     sprite_pupil.createSprite(image_width, image_height);
     sprite_pupil.fillScreen(TFT_WHITE);
@@ -147,6 +147,15 @@ public:
     const bool success_load_happy_upperlid_image = sprite_upperlid.drawJpgFile(SPIFFS, path_jpg_happy_upperlid);
     Serial.println("happy_eye");
     Serial.println(success_load_happy_upperlid_image);
+  }
+
+  // ハート目を描画する準備
+  void ready_for_heart_eye(const char *path_jpg_heart_upperlid = "/white.jpg")
+  {
+    sprite_upperlid.fillScreen(TFT_WHITE);
+    const bool success_load_heart_upperlid_image = sprite_upperlid.drawJpgFile(SPIFFS, path_jpg_heart_upperlid);
+    Serial.println("heart_eye");
+    Serial.println(success_load_heart_upperlid_image);
   }
 
   // 通常の目の描画
@@ -279,4 +288,20 @@ public:
 
     sprite_eye.pushRotateZoom(&lcd, lcd.width() >> 1, lcd.height() >> 1, 0, zoom_ratio, zoom_ratio, TFT_WHITE);
   }
+   //heart目の描画
+  void heart(float dx = 0.0, float dy = 0.0, int happy_level = 0, float scale = 10.0, float random_scale = 5.0)
+  {
+    long rx = (int)(random_scale * random(100) / 100);
+    long ry = (int)(random_scale * random(100) / 100);
+    
+    sprite_eye.clear();
+    sprite_eye.fillScreen(TFT_WHITE);
+    sprite_eyeball.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
+    
+    sprite_upperlid.pushSprite(&sprite_eye, rx, ry, TFT_WHITE);
+
+    sprite_eye.pushRotateZoom(&lcd, lcd.width() >> 1, lcd.height() >> 1, 0, zoom_ratio, zoom_ratio, TFT_WHITE);
+  }
+
+ 
 };
