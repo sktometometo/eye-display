@@ -26,7 +26,7 @@ const char path_image_surprised_iris_right[] = "/iris_surprised_right.jpg";
 const char path_image_upperlid_right[] = "/upperlid.jpg";
 const char path_image_angry_upperlid_right[] = "/upperlid_leftside_down.jpg";
 const char path_image_sad_upperlid_right[] = "/upperlid_rightside_down.jpg";
-const char path_image_happy_upperlid_right[] = "/upperlid_star.jpeg";
+const char path_image_happy_upperlid_right[] = "/upperlid_star2.jpeg";
   //"/upperlid_happy_right.jpg";
 
 const char path_image_iris_left[] = "/iris_left.jpg";
