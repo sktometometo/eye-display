@@ -21,15 +21,17 @@ const int image_height = 139;
 
 const char path_image_eyeball[] = "/eyeball.jpg";
 
-const char path_image_iris_right[] = "/tear.jpeg";
+const char path_image_iris_right[] ="/tear2.jpeg";
+  //"/tear2_right.jpg";
+// "/tear2.jpeg"
 const char path_image_surprised_iris_right[] = "/iris_surprised_right.jpg";
 const char path_image_upperlid_right[] = "/upperlid.jpg";
 const char path_image_angry_upperlid_right[] = "/upperlid_leftside_down.jpg";
 const char path_image_sad_upperlid_right[] = "/upperlid_rightside_down.jpg";
 const char path_image_happy_upperlid_right[] = "/upperlid_star2.jpeg";
-  //"/upperlid_happy_right.jpg";
+  //"/upperlid_happy_right.jpg"; //"/upperlid_star2_right.jpeg"
 const char path_image_heart_upperlid_right[] = "/upperlid_heart2.jpeg";   
-
+//"/upperlid_heart2_right.jpeg"
 const char path_image_iris_left[] = "/iris_left.jpg";
 const char path_image_surprised_iris_left[] = "/iris_surprised_left.jpg";
 const char path_image_upperlid_left[] = "/upperlid.jpg";
@@ -98,7 +100,7 @@ void setup()
   // bool mode_right;
   // if (not nh.getParam("~mode_right", &mode_right))
   if (mode_right)
-    {//left_eyeﾃﾞﾊ6ﾆｽﾙ
+    {//left_eyeﾃﾞﾊ8ﾆｽﾙ right_eye=6
     // 右目
     eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 8);
     // nh.loginfo("right eye mode_right: %s", &mode_right);

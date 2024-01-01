@@ -99,10 +99,10 @@ public:
     sprite_pupil.fillCircle(image_width / 2, image_height / 2, 30, TFT_BLACK);
 
 
-    
+    /*
     sprite_reflex.fillScreen(TFT_WHITE);
     sprite_reflex.fillCircle(50, 50, 6, TFT_LIGHTGRAY);
-    
+    */
     sprite_upperlid.fillScreen(TFT_WHITE);
     sprite_upperlid.drawJpgFile(SPIFFS, path_jpg_upperlid); 
     
@@ -119,7 +119,7 @@ public:
     sprite_pupil.fillCircle(image_height / 2, image_width / 2, 15, TFT_BLACK);
       
     sprite_reflex.fillScreen(TFT_WHITE);
-    sprite_reflex.fillCircle(image_height / 2, image_width / 2, 7, TFT_LIGHTGRAY);
+    sprite_reflex.fillCircle(image_height / 2 +5, image_width / 2, 7, TFT_LIGHTGRAY);
   }
 
   // 怒った目を描画する準備
@@ -178,7 +178,7 @@ public:
     sprite_pupil.pushSprite(&sprite_eye, (int)(scale * dx), (int)(scale * dy), TFT_WHITE); // 瞳孔をランダムに動かす
     
  
-    sprite_reflex.pushSprite(&sprite_eye, (int)(scale * dx) + rx, (int)(scale * dy) + ry, TFT_WHITE); // 光の反射をランダムに動かす
+    //sprite_reflex.pushSprite(&sprite_eye, (int)(scale * dx) + rx, (int)(scale * dy) + ry, TFT_WHITE); // 光の反射をランダムに動かす
     sprite_upperlid.pushSprite(&sprite_eye, 0, -130, TFT_WHITE); 
 
     sprite_eye.pushRotateZoom(&lcd, lcd.width() >> 1, lcd.height() >> 1, 0, zoom_ratio, zoom_ratio, TFT_WHITE); // sprite_eye をlcdに一括転送
@@ -197,7 +197,7 @@ public:
     //sprite_iris.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
     
     sprite_pupil.pushSprite(&sprite_eye, (int)(scale * dx), (int)(scale * dy), TFT_WHITE); // 瞳孔をランダムに動かす
-    sprite_reflex.pushSprite(&sprite_eye, (int)(scale * dx) + rx, (int)(scale * dy) + ry, TFT_WHITE); // 光の反射をランダムに動かす
+    //sprite_reflex.pushSprite(&sprite_eye, (int)(scale * dx) + rx, (int)(scale * dy) + ry, TFT_WHITE); // 光の反射をランダムに動かす
     
     sprite_upperlid.pushSprite(&sprite_eye, 0, upperlid_y_arr[blink_level], TFT_WHITE); // 上瞼を動かす
 
@@ -254,7 +254,7 @@ public:
     //sprite_iris.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
     
     sprite_pupil.pushSprite(&sprite_eye, (int)(scale * dx), (int)(scale * dy), TFT_WHITE); // 瞳孔をランダムに動かす
-    sprite_reflex.pushSprite(&sprite_eye, (int)(scale * dx) + rx, (int)(scale * dy) + ry + 10, TFT_WHITE); // 光の反射をランダムに動かす
+    //sprite_reflex.pushSprite(&sprite_eye, (int)(scale * dx) + rx, (int)(scale * dy) + ry + 10, TFT_WHITE); // 光の反射をランダムに動かす
     
     sprite_upperlid.pushSprite(&sprite_eye, 0, -10, TFT_WHITE);
 
