@@ -66,8 +66,9 @@ The following table shows the correspondence between the data and the emotional 
 |0| normal |
 |1| blink |
 |2| surprised |
-|3| sleepy |
+|3| sleepy (tired) |
 |4| angry |
 |5| sad / troubled |
-|6| happy |
+|6| happy (star) |
+|7| heart |
 
