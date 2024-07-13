@@ -119,9 +119,10 @@ void loop()
   
   // float look_x = 0.3 * sin(i * 0.1);
   // float look_y = 0.3 * cos(i * 0.1) ;
-  
+
   if (eye_status == 0) {
     // 通常
+	eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
     eye.update_look(look_x, look_y);
   } 
 
