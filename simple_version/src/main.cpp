@@ -1,5 +1,7 @@
 #include <Arduino.h>
 #include <math.h>
+#include <Wire.h>
+#include <WireSlave.h>
 
 #include "eye.hpp"
 
@@ -38,6 +40,30 @@ int happy_level = 0; int max_happy_level = 20;
 
 static Eye eye;
 
+constexpr int SDA_PIN = 8;
+constexpr int SCL_PIN = 9;
+constexpr int I2C_SLAVE_ADDR = 0x42;
+
+void receiveEvent(int howMany);
+
+void I2CTask(void *parameter) {
+  bool success = WireSlave.begin(SDA_PIN, SCL_PIN, I2C_SLAVE_ADDR);
+
+  Serial.println("I2C slave start");
+  if (!success) {
+    // lcd.println("I2C slave init failed");
+    Serial.println("I2C slave init failed");
+    while (1) delay(100);
+  }
+  WireSlave.onReceive(receiveEvent);
+  while (true) {
+    WireSlave.update();
+    delay(1);  // let I2C and other ESP32 peripherals interrupts work
+  }
+}
+
+
+
 void setup()
 {
   Serial.begin(115200);
@@ -63,22 +89,19 @@ void setup()
   }
 
   eye.update_look();
+  xTaskCreatePinnedToCore(I2CTask, "I2C Task", 1024, NULL, 24, NULL, 0);
 }
 
 static int i = 0;
 
 void loop()
 {
-  delay(100);
+  delay(10);
   i++;
   if (i % 50 == 0){
-    Serial.print(eye_status);
-    eye_status += 1;
-    if (eye_status == 7)
-    {
-      eye_status = 0;
-    }
+    i = 0;
   }
+
   // float look_x = 2. * sin(i * 0.1);
   // float look_y = 2. * cos(i * 0.1) - 2.;
   float look_x = 0.3 * sin(i * 0.1);
@@ -87,7 +110,7 @@ void loop()
   if (eye_status == eye_display::EyeStatus::EYE_STATUS_NORMAL) { // 0
     // 通常
     eye.update_look(look_x, look_y);
-  } 
+  }
 
   else if (eye_status == eye_display::EyeStatus::EYE_STATUS_BLINK) { // 1
     // 瞬き
@@ -162,7 +185,23 @@ void loop()
       eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
     }
   }
-
-  eye.draw_updated_image();
   Serial.printf("look_x: %f, look_y: %f\n", look_x, look_y);
+  eye.draw_updated_image();
+}
+
+
+void receiveEvent(int howMany) {
+  // lastReceiveTime = millis();  // Update the last received time
+  String str;
+  while (0 < WireSlave.available()) {
+    char c = WireSlave.read();  // receive byte as a character
+    str += c;
+  }
+  if (str == "0") {eye_status = 0;}
+  if (str == "1") {eye_status = 1;}
+  if (str == "2") {eye_status = 2;}
+  if (str == "3") {eye_status = 3;}
+  if (str == "4") {eye_status = 4;}
+  if (str == "5") {eye_status = 5;}
+  if (str == "5") {eye_status = 6;}
 }
