@@ -40,11 +40,11 @@ int happy_level = 0; int max_happy_level = 20;
 
 static Eye eye;
 
-constexpr int SDA_PIN = 8;
+constexpr int SDA_PIN = 8; //design pin number
 constexpr int SCL_PIN = 9;
-constexpr int I2C_SLAVE_ADDR = 0x42;
+constexpr int I2C_SLAVE_ADDR = 0x42; //I2C slave address
 
-void receiveEvent(int howMany);
+void receiveEvent(int howMany); //callback
 
 void I2CTask(void *parameter) {
   bool success = WireSlave.begin(SDA_PIN, SCL_PIN, I2C_SLAVE_ADDR);
@@ -71,7 +71,7 @@ void setup()
   pinMode(TFT_BL, OUTPUT);
   digitalWrite(TFT_BL, HIGH);
 
-  SPIFFS.begin();
+  SPIFFS.begin(); //manage image resources
 
   delay(5000);
 
