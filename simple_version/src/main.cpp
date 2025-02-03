@@ -6,7 +6,6 @@
 #define TFT_BL 10
 
 const int image_width = 139;
-// const int image_height = 120;
 const int image_height = 139;
 
 const char path_image_eyeball[] = "/eyeball.jpg";
@@ -18,12 +17,12 @@ const char path_image_angry_upperlid_right[] = "/upperlid_leftside_down.jpg";
 const char path_image_sad_upperlid_right[] = "/upperlid_rightside_down.jpg";
 const char path_image_happy_upperlid_right[] = "/upperlid_happy_right.jpg";
 
-const char path_image_iris_left[] = "/iris_left.jpg";
-const char path_image_surprised_iris_left[] = "/iris_surprised_left.jpg";
-const char path_image_upperlid_left[] = "/upperlid.jpg";
-const char path_image_angry_upperlid_left[] = "/upperlid_rightside_down.jpg";
-const char path_image_sad_upperlid_left[] = "/upperlid_leftside_down.jpg";
-const char path_image_happy_upperlid_left[] =  "/upperlid_happy_left.jpg";
+// const char path_image_iris_left[] = "/iris_left.jpg";
+// const char path_image_surprised_iris_left[] = "/iris_surprised_left.jpg";
+// const char path_image_upperlid_left[] = "/upperlid.jpg";
+// const char path_image_angry_upperlid_left[] = "/upperlid_rightside_down.jpg";
+// const char path_image_sad_upperlid_left[] = "/upperlid_leftside_down.jpg";
+// const char path_image_happy_upperlid_left[] =  "/upperlid_happy_left.jpg";
 
 // eye_status ... 0: 通常, 1: 瞬き, 2: 驚き, 3: 眠い, 4: 怒る, 5: 悲しむ・困る, 6: 嬉しい...
 int eye_status = 0;
@@ -50,13 +49,10 @@ void setup()
   String mode = "right";
   if (mode == "right")
   {
-    Serial.printf("aaa\n");
     eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 1);
-    Serial.printf("hello\n");
   }
   else
   {
-    // eye.init(path_image_eyeball, path_image_iris_left, path_image_upperlid_left, image_width, image_height, 5);
     eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 5);
   }
 

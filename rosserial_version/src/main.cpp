@@ -19,7 +19,6 @@ const int image_width = 139;
 const int image_height = 139;
 
 const char path_image_eyeball[] = "/eyeball.jpg";
-
 const char path_image_iris_right[] = "/iris_right.jpg";
 const char path_image_surprised_iris_right[] = "/iris_surprised_right.jpg";
 const char path_image_upperlid_right[] = "/upperlid.jpg";
@@ -27,12 +26,12 @@ const char path_image_angry_upperlid_right[] = "/upperlid_leftside_down.jpg";
 const char path_image_sad_upperlid_right[] = "/upperlid_rightside_down.jpg";
 const char path_image_happy_upperlid_right[] = "/upperlid_happy_right.jpg";
 
-const char path_image_iris_left[] = "/iris_left.jpg";
-const char path_image_surprised_iris_left[] = "/iris_surprised_left.jpg";
-const char path_image_upperlid_left[] = "/upperlid.jpg";
-const char path_image_angry_upperlid_left[] = "/upperlid_rightside_down.jpg";
-const char path_image_sad_upperlid_left[] = "/upperlid_leftside_down.jpg";
-const char path_image_happy_upperlid_left[] =  "/upperlid_happy_left.jpg";
+// const char path_image_iris_left[] = "/iris_left.jpg";
+// const char path_image_surprised_iris_left[] = "/iris_surprised_left.jpg";
+// const char path_image_upperlid_left[] = "/upperlid.jpg";
+// const char path_image_angry_upperlid_left[] = "/upperlid_rightside_down.jpg";
+// const char path_image_sad_upperlid_left[] = "/upperlid_leftside_down.jpg";
+// const char path_image_happy_upperlid_left[] =  "/upperlid_happy_left.jpg";
 
 // eye_status ... 0: 通常, 1: 瞬き, 2: 驚き, 3: 眠い, 4: 怒る, 5: 悲しむ・困る, 6: 嬉しい...
 int eye_status = 0;
@@ -42,7 +41,6 @@ int sleepy_level = 0; int max_sleepy_level = 10;
 int angry_level = 0; int max_angry_level = 20;
 int sad_level = 0; int max_sad_level = 20;
 int happy_level = 0; int max_happy_level = 20;
-
 
 static Eye eye;
 
@@ -55,7 +53,6 @@ void callback_emotion(const std_msgs::UInt16 &msg);
 ros::NodeHandle_<ArduinoHardware> nh;
 ros::Subscriber<geometry_msgs::Point> sub_point("~look_at", &callback_look_at);
 ros::Subscriber<std_msgs::UInt16> sub_eye_status("eye_status", &callback_emotion);
-
 
 void callback_look_at(const geometry_msgs::Point &msg)
 {
@@ -88,22 +85,33 @@ void setup()
     nh.spinOnce();
     delay(1000);
   }
-
+  
   bool mode_right;
-  nh.getParam("~mode_right", &mode_right);
+  if (nh.getParam("~mode_right", &mode_right)) {
+    Serial.print("Successfully retrieved mode_right: ");
+    Serial.println(mode_right ? "true" : "false");
+    nh.loginfo(mode_right ? "mode_right is true" : "mode_right is false");
+  } else {
+    Serial.println("Failed to get mode_right parameter");
+    nh.loginfo("Failed to get mode_right parameter");
+  }
+
+  // if (not nh.getParam("~mode_right", &mode_right))
   if (mode_right)
   {
     // 右目
+    nh.loginfo("get mode_right parameter");
     eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 1);
   }
   else
   {
     // 左目
+    nh.loginfo("get !mode_right parameter");
     eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 5);
   }
   eye.update_look();
 }
-
+  
 static int i = 0;
 
 void loop()
