@@ -26,13 +26,6 @@ const char path_image_angry_upperlid_right[] = "/upperlid_leftside_down.jpg";
 const char path_image_sad_upperlid_right[] = "/upperlid_rightside_down.jpg";
 const char path_image_happy_upperlid_right[] = "/upperlid_happy_right.jpg";
 
-// const char path_image_iris_left[] = "/iris_left.jpg";
-// const char path_image_surprised_iris_left[] = "/iris_surprised_left.jpg";
-// const char path_image_upperlid_left[] = "/upperlid.jpg";
-// const char path_image_angry_upperlid_left[] = "/upperlid_rightside_down.jpg";
-// const char path_image_sad_upperlid_left[] = "/upperlid_leftside_down.jpg";
-// const char path_image_happy_upperlid_left[] =  "/upperlid_happy_left.jpg";
-
 // eye_status ... 0: 通常, 1: 瞬き, 2: 驚き, 3: 眠い, 4: 怒る, 5: 悲しむ・困る, 6: 嬉しい...
 int eye_status = 0;
 int blink_level = 0; int max_blink_level = 6;
@@ -88,11 +81,8 @@ void setup()
   
   bool mode_right;
   if (nh.getParam("~mode_right", &mode_right)) {
-    Serial.print("Successfully retrieved mode_right: ");
-    Serial.println(mode_right ? "true" : "false");
     nh.loginfo(mode_right ? "mode_right is true" : "mode_right is false");
   } else {
-    Serial.println("Failed to get mode_right parameter");
     nh.loginfo("Failed to get mode_right parameter");
   }
 
@@ -100,13 +90,13 @@ void setup()
   if (mode_right)
   {
     // 右目
-    nh.loginfo("get mode_right parameter");
+    nh.loginfo("get mode_right is true");
     eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 1);
   }
   else
   {
     // 左目
-    nh.loginfo("get !mode_right parameter");
+    nh.loginfo("get !mode_right is false");
     eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 5);
   }
   eye.update_look();

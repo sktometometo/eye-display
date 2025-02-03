@@ -17,13 +17,6 @@ const char path_image_angry_upperlid_right[] = "/upperlid_leftside_down.jpg";
 const char path_image_sad_upperlid_right[] = "/upperlid_rightside_down.jpg";
 const char path_image_happy_upperlid_right[] = "/upperlid_happy_right.jpg";
 
-// const char path_image_iris_left[] = "/iris_left.jpg";
-// const char path_image_surprised_iris_left[] = "/iris_surprised_left.jpg";
-// const char path_image_upperlid_left[] = "/upperlid.jpg";
-// const char path_image_angry_upperlid_left[] = "/upperlid_rightside_down.jpg";
-// const char path_image_sad_upperlid_left[] = "/upperlid_leftside_down.jpg";
-// const char path_image_happy_upperlid_left[] =  "/upperlid_happy_left.jpg";
-
 // eye_status ... 0: 通常, 1: 瞬き, 2: 驚き, 3: 眠い, 4: 怒る, 5: 悲しむ・困る, 6: 嬉しい...
 int eye_status = 0;
 int blink_level = 0; int max_blink_level = 6;
@@ -73,8 +66,7 @@ void loop()
       eye_status = 0;
     }
   }
-  // float look_x = 2. * sin(i * 0.1);
-  // float look_y = 2. * cos(i * 0.1) - 2.;
+
   float look_x = 0.3 * sin(i * 0.1);
   float look_y = 0.3 * cos(i * 0.1) ;
 
