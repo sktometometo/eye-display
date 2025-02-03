@@ -16,24 +16,15 @@
 #define TFT_BL 10
 
 const int image_width = 139;
-// const int image_height = 120;
 const int image_height = 139;
 
 const char path_image_eyeball[] = "/eyeball.jpg";
-
 const char path_image_iris_right[] = "/iris_right.jpg";
 const char path_image_surprised_iris_right[] = "/iris_surprised_right.jpg";
 const char path_image_upperlid_right[] = "/upperlid.jpg";
 const char path_image_angry_upperlid_right[] = "/upperlid_leftside_down.jpg";
 const char path_image_sad_upperlid_right[] = "/upperlid_rightside_down.jpg";
 const char path_image_happy_upperlid_right[] = "/upperlid_happy_right.jpg";
-
-const char path_image_iris_left[] = "/iris_left.jpg";
-const char path_image_surprised_iris_left[] = "/iris_surprised_left.jpg";
-const char path_image_upperlid_left[] = "/upperlid.jpg";
-const char path_image_angry_upperlid_left[] = "/upperlid_rightside_down.jpg";
-const char path_image_sad_upperlid_left[] = "/upperlid_leftside_down.jpg";
-const char path_image_happy_upperlid_left[] =  "/upperlid_happy_left.jpg";
 
 // eye_status ... 0: 通常, 1: 瞬き, 2: 驚き, 3: 眠い, 4: 怒る, 5: 悲しむ・困る, 6: 嬉しい...
 int eye_status = 0;
@@ -43,7 +34,6 @@ int sleepy_level = 0; int max_sleepy_level = 10;
 int angry_level = 0; int max_angry_level = 20;
 int sad_level = 0; int max_sad_level = 20;
 int happy_level = 0; int max_happy_level = 20;
-
 
 static Eye eye;
 
@@ -55,9 +45,7 @@ void callback_emotion(const std_msgs::UInt16 &msg);
 
 ros::NodeHandle_<ArduinoHardware> nh;
 ros::Subscriber<geometry_msgs::Point> sub_point("~look_at", &callback_look_at);
-// ros::Subscriber<std_msgs::UInt16> sub_eye_status("eye_status", &callback_emotion);
 ros::Subscriber<std_msgs::UInt16> sub_eye_status("eye_status", &callback_emotion);
-
 
 void callback_look_at(const geometry_msgs::Point &msg)
 {
@@ -90,39 +78,40 @@ void setup()
     nh.spinOnce();
     delay(1000);
   }
-
+  
   bool mode_right;
-  nh.getParam("~mode_right", &mode_right);
-  // bool mode_right;
+  if (nh.getParam("~mode_right", &mode_right)) {
+    nh.loginfo(mode_right ? "mode_right is true" : "mode_right is false");
+  } else {
+    nh.loginfo("Failed to get mode_right parameter");
+  }
+
   // if (not nh.getParam("~mode_right", &mode_right))
   if (mode_right)
   {
     // 右目
+    nh.loginfo("get mode_right is true");
     eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 1);
-    // nh.loginfo("right eye mode_right: %s", &mode_right);
   }
   else
   {
     // 左目
-    eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 1);
-    // nh.loginfo("left eye mode_right: %s", &mode_right);
+    nh.loginfo("get !mode_right is false");
+    eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 5);
   }
   eye.update_look();
 }
-
+  
 static int i = 0;
 
 void loop()
 {
   delay(100);
   i++;
-  
-  // float look_x = 0.3 * sin(i * 0.1);
-  // float look_y = 0.3 * cos(i * 0.1) ;
 
   if (eye_status == 0) {
     // 通常
-	eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
+    eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
     eye.update_look(look_x, look_y);
   } 
 
@@ -197,9 +186,6 @@ void loop()
       eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
     }
   }
-
-  // nh.loginfo("look_x: %f, look_y: %f\n", look_x, look_y);
-  // nh.loginfo()
 
   nh.spinOnce();
 }

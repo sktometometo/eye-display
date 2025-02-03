@@ -154,12 +154,12 @@ public:
     sprite_eye.fillScreen(TFT_WHITE);
     sprite_eyeball.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
     sprite_iris.pushSprite(&sprite_eye, (int)(scale * dx), (int)(scale * dy), TFT_WHITE);
-
+    // sprite_iris.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
     sprite_pupil.pushSprite(&sprite_eye, (int)(scale * dx), (int)(scale * dy), TFT_WHITE); // 瞳孔をランダムに動かす
     sprite_reflex.pushSprite(&sprite_eye, (int)(scale * dx) + rx, (int)(scale * dy) + ry, TFT_WHITE); // 光の反射をランダムに動かす
     sprite_upperlid.pushSprite(&sprite_eye, 0, -130, TFT_WHITE); 
 
-    sprite_eye.pushRotateZoom(&lcd, lcd.width() >> 1, lcd.height() >> 1, 0, zoom_ratio, zoom_ratio, TFT_WHITE); // sprite_eye をlcdに一括転送
+    draw_updated_image();
   }
 
   // 瞬きの描画
@@ -179,7 +179,7 @@ public:
     
     sprite_upperlid.pushSprite(&sprite_eye, 0, upperlid_y_arr[blink_level], TFT_WHITE); // 上瞼を動かす
 
-    sprite_eye.pushRotateZoom(&lcd, lcd.width() >> 1, lcd.height() >> 1, 0, zoom_ratio, zoom_ratio, TFT_WHITE); // sprite_eye をlcdに一括転送
+    draw_updated_image();
   }
 
 
@@ -199,7 +199,7 @@ public:
     sprite_reflex.pushSprite(&sprite_eye, (int)(scale * dx) + rx, (int)(scale * dy) + ry, TFT_WHITE);
     sprite_upperlid.pushSprite(&sprite_eye, 0, upperlid_y_arr[surprised_level], TFT_WHITE);
     
-    sprite_eye.pushRotateZoom(&lcd, lcd.width() >> 1, lcd.height() >> 1, 0, zoom_ratio, zoom_ratio, TFT_WHITE);
+    draw_updated_image();
   }
 
   // 眠い目の描画
@@ -217,7 +217,7 @@ public:
     sprite_pupil.pushSprite(&sprite_eye, (int)(scale * dx) - 10, (int)(scale * dy) + 15, TFT_WHITE);
     sprite_upperlid.pushSprite(&sprite_eye, 0, upperlid_y_arr[sleepy_level]);
 
-    sprite_eye.pushRotateZoom(&lcd, lcd.width() >> 1, lcd.height() >> 1, 0, zoom_ratio, zoom_ratio, TFT_WHITE);
+    draw_updated_image();
   }
 
   // 怒った目の描画
@@ -236,7 +236,7 @@ public:
     
     sprite_upperlid.pushSprite(&sprite_eye, 0, -10, TFT_WHITE);
 
-    sprite_eye.pushRotateZoom(&lcd, lcd.width() >> 1, lcd.height() >> 1, 0, zoom_ratio, zoom_ratio, TFT_WHITE);
+    draw_updated_image();
   }
 
   // 悲しい目の描画
@@ -255,7 +255,7 @@ public:
     
     sprite_upperlid.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
 
-    sprite_eye.pushRotateZoom(&lcd, lcd.width() >> 1, lcd.height() >> 1, 0, zoom_ratio, zoom_ratio, TFT_WHITE);
+    draw_updated_image();
   }
 
   // 嬉しい目の描画
@@ -270,7 +270,7 @@ public:
     
     sprite_upperlid.pushSprite(&sprite_eye, rx, ry, TFT_WHITE);
 
-    sprite_eye.pushRotateZoom(&lcd, lcd.width() >> 1, lcd.height() >> 1, 0, zoom_ratio, zoom_ratio, TFT_WHITE);
+    draw_updated_image();
   }
 
   void draw_updated_image()
