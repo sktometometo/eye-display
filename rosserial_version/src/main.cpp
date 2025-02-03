@@ -16,7 +16,6 @@
 #define TFT_BL 10
 
 const int image_width = 139;
-// const int image_height = 120;
 const int image_height = 139;
 
 const char path_image_eyeball[] = "/eyeball.jpg";
@@ -55,7 +54,6 @@ void callback_emotion(const std_msgs::UInt16 &msg);
 
 ros::NodeHandle_<ArduinoHardware> nh;
 ros::Subscriber<geometry_msgs::Point> sub_point("~look_at", &callback_look_at);
-// ros::Subscriber<std_msgs::UInt16> sub_eye_status("eye_status", &callback_emotion);
 ros::Subscriber<std_msgs::UInt16> sub_eye_status("eye_status", &callback_emotion);
 
 
@@ -93,19 +91,15 @@ void setup()
 
   bool mode_right;
   nh.getParam("~mode_right", &mode_right);
-  // bool mode_right;
-  // if (not nh.getParam("~mode_right", &mode_right))
   if (mode_right)
   {
     // 右目
     eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 1);
-    // nh.loginfo("right eye mode_right: %s", &mode_right);
   }
   else
   {
     // 左目
-    eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 1);
-    // nh.loginfo("left eye mode_right: %s", &mode_right);
+    eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 5);
   }
   eye.update_look();
 }
@@ -116,13 +110,10 @@ void loop()
 {
   delay(100);
   i++;
-  
-  // float look_x = 0.3 * sin(i * 0.1);
-  // float look_y = 0.3 * cos(i * 0.1) ;
 
   if (eye_status == 0) {
     // 通常
-	eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
+    eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
     eye.update_look(look_x, look_y);
   } 
 
@@ -197,9 +188,6 @@ void loop()
       eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
     }
   }
-
-  // nh.loginfo("look_x: %f, look_y: %f\n", look_x, look_y);
-  // nh.loginfo()
 
   nh.spinOnce();
 }
