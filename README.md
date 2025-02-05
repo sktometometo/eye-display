@@ -21,7 +21,9 @@ And then, you can build and upload the firmware to the device.
 
 ### Simple demo
 
-<Demo video>
+
+https://github.com/user-attachments/assets/e2b44bc5-4f85-489f-b862-e851fd4cdf32
+
 
 You can check basic functionalities with a demo firmware.
 
