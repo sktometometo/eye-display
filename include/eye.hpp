@@ -29,6 +29,14 @@ private:
   int image_height;
 
 public:
+
+  const static int max_blink_level = 6;
+  const static int max_surprised_level = 16;
+  const static int max_sleepy_level = 10;
+  const static int max_angry_level = 20;
+  const static int max_sad_level = 20;
+  const static int max_happy_level = 20;
+
   void init(const char *path_jpg_eyeball, const char *path_jpg_iris, const char *path_jpg_upperlid, 
             const int image_width, const int image_height, int rotation = 0)
 

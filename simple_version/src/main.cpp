@@ -1,20 +1,14 @@
 #include <Arduino.h>
 #include <math.h>
-#include <Wire.h>
-#include <WireSlave.h>
 
 #include "eye.hpp"
 
 #define TFT_BL 10
 
-#include "eye_display/EyeStatus.h"
-
 const int image_width = 139;
-// const int image_height = 120;
 const int image_height = 139;
 
 const char path_image_eyeball[] = "/eyeball.jpg";
-
 const char path_image_iris_right[] = "/iris_right.jpg";
 const char path_image_surprised_iris_right[] = "/iris_surprised_right.jpg";
 const char path_image_upperlid_right[] = "/upperlid.jpg";
@@ -22,186 +16,97 @@ const char path_image_angry_upperlid_right[] = "/upperlid_leftside_down.jpg";
 const char path_image_sad_upperlid_right[] = "/upperlid_rightside_down.jpg";
 const char path_image_happy_upperlid_right[] = "/upperlid_happy_right.jpg";
 
-const char path_image_iris_left[] = "/iris_left.jpg";
-const char path_image_surprised_iris_left[] = "/iris_surprised_left.jpg";
-const char path_image_upperlid_left[] = "/upperlid.jpg";
-const char path_image_angry_upperlid_left[] = "/upperlid_rightside_down.jpg";
-const char path_image_sad_upperlid_left[] = "/upperlid_leftside_down.jpg";
-const char path_image_happy_upperlid_left[] =  "/upperlid_happy_left.jpg";
-
-// eye_status ... 0: 通常, 1: 瞬き, 2: 驚き, 3: 眠い, 4: 怒る, 5: 悲しむ・困る, 6: 嬉しい...
-int eye_status = 0;
-int blink_level = 0; int max_blink_level = 6;
-int surprised_level = 0; int max_surprised_level = 16;
-int sleepy_level = 0; int max_sleepy_level = 10;
-int angry_level = 0; int max_angry_level = 20;
-int sad_level = 0; int max_sad_level = 20;
-int happy_level = 0; int max_happy_level = 20;
-
 static Eye eye;
-
-constexpr int SDA_PIN = 8;
-constexpr int SCL_PIN = 9;
-constexpr int I2C_SLAVE_ADDR = 0x42;
-
-void receiveEvent(int howMany);
-
-void I2CTask(void *parameter) {
-  bool success = WireSlave.begin(SDA_PIN, SCL_PIN, I2C_SLAVE_ADDR);
-
-  Serial.println("I2C slave start");
-  if (!success) {
-    // lcd.println("I2C slave init failed");
-    Serial.println("I2C slave init failed");
-    while (1) delay(100);
-  }
-  WireSlave.onReceive(receiveEvent);
-  while (true) {
-    WireSlave.update();
-    delay(1);  // let I2C and other ESP32 peripherals interrupts work
-  }
-}
-
-
 
 void setup()
 {
   Serial.begin(115200);
-
   pinMode(TFT_BL, OUTPUT);
   digitalWrite(TFT_BL, HIGH);
-
   SPIFFS.begin();
+  Serial.println("Initialized.");
 
   delay(5000);
 
-  String mode = "right";
-  if (mode == "right")
-  {
-    Serial.printf("aaa\n");
-    eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 1);
-    Serial.printf("hello\n");
-  }
-  else
-  {
-    // eye.init(path_image_eyeball, path_image_iris_left, path_image_upperlid_left, image_width, image_height, 5);
-    eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 5);
-  }
-
+  eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 1);
   eye.update_look();
-  xTaskCreatePinnedToCore(I2CTask, "I2C Task", 1024, NULL, 24, NULL, 0);
-}
 
-static int i = 0;
+  Serial.println("Start.");
+}
 
 void loop()
 {
-  delay(10);
-  i++;
-  if (i % 50 == 0){
-    i = 0;
+  // 通常
+  float look_x, look_y;
+  eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
+  for (int i=0; i<50; i++) {
+      delay(20);
+      look_x = 0.3 * sin(i * 0.1);
+      look_y = 0.3 * cos(i * 0.1) ;
+      eye.update_look(look_x, look_y);
+      eye.draw_updated_image();
   }
+  look_x = 0;
+  look_y = 0;
+  eye.update_look(look_x, look_y);
+  delay(1000);
 
-  // float look_x = 2. * sin(i * 0.1);
-  // float look_y = 2. * cos(i * 0.1) - 2.;
-  float look_x = 0.3 * sin(i * 0.1);
-  float look_y = 0.3 * cos(i * 0.1) ;
-
-  if (eye_status == eye_display::EyeStatus::EYE_STATUS_NORMAL) { // 0
-    // 通常
-    eye.update_look(look_x, look_y);
+  int blink_level = 0;
+  eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
+  for (int i=0; i<50; i++) {
+      delay(20);
+      blink_level = i % Eye::max_blink_level;
+      eye.blink_eye(look_x, look_y, blink_level);
+      eye.draw_updated_image();
   }
+  delay(1000);
 
-  else if (eye_status == eye_display::EyeStatus::EYE_STATUS_BLINK) { // 1
-    // 瞬き
-    eye.blink_eye(look_x, look_y, blink_level);
-    blink_level += 1;
-    if (blink_level == max_blink_level){
-      blink_level = 0;
-      // eye_status = 0;
-    }
+  int surprised_level = 0;
+  eye.ready_for_surprised_eye(path_image_surprised_iris_right);
+  for (int i=0; i<50; i++) {
+      delay(20);
+      surprised_level = i % Eye::max_surprised_level;
+      eye.surprised(look_x, look_y, surprised_level);
+      eye.draw_updated_image();
   }
+  delay(1000);
 
-  else if (eye_status == eye_display::EyeStatus::EYE_STATUS_SURPRISED) { // 2
-    // 驚き
-    if (surprised_level == 0){
-      eye.ready_for_surprised_eye(path_image_surprised_iris_right);
-    }
-    eye.surprised(look_x, look_y, surprised_level);
-    surprised_level += 1;
-    if (surprised_level == max_surprised_level){
-      surprised_level = 0;
-      // eye_status = 0;
-      eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
-    }
+  int sleepy_level = 0;
+  eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
+  for (int i=0; i<50; i++) {
+      delay(20);
+      sleepy_level = i & Eye::max_sleepy_level;
+      eye.sleepy(look_x, look_y, sleepy_level);
+      eye.draw_updated_image();
   }
+  delay(1000);
 
-  else if (eye_status == eye_display::EyeStatus::EYE_STATUS_SLEEPY) { // 3
-    // 眠い
-    eye.sleepy(look_x, look_y, sleepy_level);
-    sleepy_level += 1;
-    if (sleepy_level == max_sleepy_level){
-      sleepy_level = 0;
-      // eye_status = 0;
-      eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
-    }
+  int angry_level = 0;
+  eye.ready_for_angry_eye(path_image_angry_upperlid_right);
+  for (int i=0; i<50; i++) {
+      delay(20);
+      angry_level = i % Eye::max_angry_level;
+      eye.angry(look_x, look_y, angry_level);
+      eye.draw_updated_image();
   }
+  delay(1000);
 
-  else if (eye_status == eye_display::EyeStatus::EYE_STATUS_ANGRY){ // 4
-    // 怒り
-    if (angry_level == 0){
-      eye.ready_for_angry_eye(path_image_angry_upperlid_right);
-    }
-    eye.angry(look_x, look_y, angry_level);
-    angry_level += 1;
-    if (angry_level == max_angry_level){
-      angry_level = 0;
-      eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
-    }
+  int sad_level = 0;
+  eye.ready_for_sad_eye(path_image_sad_upperlid_right);
+  for (int i=0; i<50; i++) {
+      delay(20);
+      sad_level = i % Eye::max_sad_level;
+      eye.sad(look_x, look_y, sad_level);
+      eye.draw_updated_image();
   }
+  delay(1000);
 
-  else if (eye_status == eye_display::EyeStatus::EYE_STATUS_SAD) { // 5
-    // 悲しむ・困る
-    if (sad_level == 0){
-      eye.ready_for_sad_eye(path_image_sad_upperlid_right);
-    }
-    eye.sad(look_x, look_y, sad_level);
-    sad_level += 1;
-    if (sad_level == max_sad_level){
-      sad_level = 0;
-      eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
-    }
+  int happy_level = 0;
+  eye.ready_for_happy_eye(path_image_happy_upperlid_right);
+  for (int i=0; i<50; i++) {
+      delay(20);
+      happy_level = i % Eye::max_happy_level;
+      eye.happy(look_x, look_y, happy_level);
+      eye.draw_updated_image();
   }
-
-  else if (eye_status == eye_display::EyeStatus::EYE_STATUS_HAPPY) { // 6
-    // 喜ぶ
-    if (happy_level == 0){
-      eye.ready_for_happy_eye(path_image_happy_upperlid_right);
-    }
-    eye.happy(look_x, look_y, happy_level);
-    happy_level += 1;
-    if (happy_level == max_happy_level){
-      happy_level = 0;
-      eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
-    }
-  }
-  Serial.printf("look_x: %f, look_y: %f\n", look_x, look_y);
-  eye.draw_updated_image();
-}
-
-
-void receiveEvent(int howMany) {
-  // lastReceiveTime = millis();  // Update the last received time
-  String str;
-  while (0 < WireSlave.available()) {
-    char c = WireSlave.read();  // receive byte as a character
-    str += c;
-  }
-  if (str == "0") {eye_status = 0;}
-  if (str == "1") {eye_status = 1;}
-  if (str == "2") {eye_status = 2;}
-  if (str == "3") {eye_status = 3;}
-  if (str == "4") {eye_status = 4;}
-  if (str == "5") {eye_status = 5;}
-  if (str == "5") {eye_status = 6;}
 }
