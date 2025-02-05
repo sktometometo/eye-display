@@ -124,7 +124,7 @@ void loop()
     }
   }
 
-  else if (eye_status == eye_display::EyeStatus::EYE_STATUS_ANGLY){ // 4
+  else if (eye_status == eye_display::EyeStatus::EYE_STATUS_ANGRY){ // 4
     // 怒り
     if (angry_level == 0){
       eye.ready_for_angry_eye(path_image_angry_upperlid_right);
