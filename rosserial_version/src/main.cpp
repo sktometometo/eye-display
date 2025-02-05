@@ -1,6 +1,11 @@
 #include <Arduino.h>
 #include <math.h>
 
+#if defined(USE_I2C)
+#include <Wire.h>
+#include <WireSlave.h>
+#endif
+
 #include "eye.hpp"
 
 #if defined(STAMPS3)
@@ -15,6 +20,10 @@
 #include "eye_display/EyeStatus.h"
 
 #define TFT_BL 10
+
+constexpr int SDA_PIN = 8;
+constexpr int SCL_PIN = 9;
+constexpr int I2C_SLAVE_ADDR = 0x42;
 
 const int image_width = 139;
 // const int image_height = 120;
@@ -45,7 +54,6 @@ int angry_level = 0; int max_angry_level = 20;
 int sad_level = 0; int max_sad_level = 20;
 int happy_level = 0; int max_happy_level = 20;
 
-
 static Eye eye;
 
 float look_x = 0;
@@ -54,11 +62,29 @@ float look_y = 0;
 void callback_look_at(const geometry_msgs::Point &msg);
 void callback_emotion(const std_msgs::UInt16 &msg);
 
+void receiveEvent(int howMany);
+
 ros::NodeHandle_<ArduinoHardware> nh;
 ros::Subscriber<geometry_msgs::Point> sub_point("~look_at", &callback_look_at);
-// ros::Subscriber<std_msgs::UInt16> sub_eye_status("eye_status", &callback_emotion);
 ros::Subscriber<std_msgs::UInt16> sub_eye_status("eye_status", &callback_emotion);
 
+
+#if defined(USE_I2C)
+void I2CTask(void *parameter) {
+  bool success = WireSlave.begin(SDA_PIN, SCL_PIN, I2C_SLAVE_ADDR);
+
+  Serial.println("I2C slave start");
+  if (!success) {
+    Serial.println("I2C slave init failed");
+    while (1) delay(100);
+  }
+  WireSlave.onReceive(receiveEvent);
+  while (true) {
+    WireSlave.update();
+    delay(1);  // let I2C and other ESP32 peripherals interrupts work
+  }
+}
+#endif
 
 void callback_look_at(const geometry_msgs::Point &msg)
 {
@@ -81,6 +107,15 @@ void setup()
   SPIFFS.begin();
   Serial.begin(115200);
 
+#if defined(USE_I2C)
+#if defined(EYE_RIGHT)
+  eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 1);
+#else
+  eye.init(path_image_eyeball, path_image_iris_left, path_image_upperlid_left, image_width, image_height, 5);
+#endif
+  eye.update_look();
+  xTaskCreatePinnedToCore(I2CTask, "I2C Task", 1024, NULL, 24, NULL, 0);
+#else
   nh.initNode();
   nh.subscribe(sub_point);
   nh.subscribe(sub_eye_status);
@@ -109,14 +144,12 @@ void setup()
     // nh.loginfo("left eye mode_right: %s", &mode_right);
   }
   eye.update_look();
+#endif
 }
-
-static int i = 0;
 
 void loop()
 {
   delay(100);
-  i++;
 
   if (eye_status == eye_display::EyeStatus::EYE_STATUS_NORMAL) { // 0
     // 通常
@@ -196,8 +229,23 @@ void loop()
     }
   }
 
-  // nh.loginfo("look_x: %f, look_y: %f\n", look_x, look_y);
-  // nh.loginfo()
-
   nh.spinOnce();
 }
+
+#if defined(USE_I2C)
+void receiveEvent(int howMany) {
+  // lastReceiveTime = millis();  // Update the last received time
+  String str;
+  while (0 < WireSlave.available()) {
+    char c = WireSlave.read();  // receive byte as a character
+    str += c;
+  }
+  if (str == "0") {eye_status = 0;}
+  if (str == "1") {eye_status = 1;}
+  if (str == "2") {eye_status = 2;}
+  if (str == "3") {eye_status = 3;}
+  if (str == "4") {eye_status = 4;}
+  if (str == "5") {eye_status = 5;}
+  if (str == "6") {eye_status = 6;}
+}
+#endif
