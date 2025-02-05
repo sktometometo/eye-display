@@ -9,6 +9,8 @@ Eye Display Example
 
 ## How to use
 
+### Installation
+
 First you have to install ROS and PlatformIO
 
 ```bash
@@ -17,7 +19,11 @@ pip install platformio
 
 And then, you can build and upload the firmware to the device.
 
-For simple_version and type 1 device (display module with m5stamp-c3)
+### Simple demo
+
+<Demo video>
+
+You can check basic functionalities with a demo firmware.
 
 ```bash
 cd simple_version
@@ -28,14 +34,23 @@ pio run -e stampc3 -t upload --upload-port <port to device>
 
 Then simple_version will work
 
-For rosserial_version and type 2 device (display module with m5stamp-s3)
+Please replace `stampc3` with `stamps3` if you use type 2 device.
+
+### rossserial/I2C version
+
+If you want to control the device with rosserial or I2C, please use `rosserial_version` firmware.
+
+
+#### rosserial version
 
 ```bash
 cd rosserial_version
-pio run -e stamps3
-pio run -e stamps3 -t uploadfs --upload-port <port to device>
-pio run -e stamps3 -t upload --upload-port <port to device>
+pio run -e stampc3-ros
+pio run -e stampc3-ros -t uploadfs --upload-port <port to device>
+pio run -e stampc3-ros -t upload --upload-port <port to device>
 ```
+
+(Please replace `stampc3` with `stamps3` if you use type 2 device.)
 
 And run serial node
 
@@ -60,7 +75,10 @@ You can control emotion expression with eye by publishing a message to "/eye_sta
 ```bash
 rostopic pub -1 /eye_status std_msgs/UInt16 "data: 0"
 ```
+
 The following table shows the correspondence between the data and the emotional expression of the eyes.
+Please also see [the message definition](./msg/EyeStatus.msg).
+
 | data | emotion |
 |---|---|
 |0| normal |
@@ -71,3 +89,21 @@ The following table shows the correspondence between the data and the emotional 
 |5| sad / troubled |
 |6| happy |
 
+
+#### I2C version
+
+If you want to control the device through I2C bus, please use following env.
+
+- `stampc3-i2c-right`: Stamp C3 device on right eye
+- `stampc3-i2c-left`: Stamp C3 device on left eye
+- `stamps3-i2c-right`: Stamp C3 device on right eye
+- `stamps3-i2c-left`: Stamp C3 device on left eye
+
+```bash
+cd rosserial_version
+pio run -e <env name>
+pio run -e <env name> -t uploadfs --upload-port <port to device>
+pio run -e <env name> -t upload --upload-port <port to device>
+```
+
+Then you can control the device with I2C.
