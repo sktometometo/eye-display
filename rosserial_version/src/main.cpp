@@ -12,6 +12,7 @@
 #include "ros/node_handle.h"
 #include "geometry_msgs/Point.h"
 #include "std_msgs/UInt16.h"
+#include "eye_display/EyeStatus.h"
 
 #define TFT_BL 10
 
@@ -117,13 +118,13 @@ void loop()
   delay(100);
   i++;
 
-  if (eye_status == 0) {
+  if (eye_status == eye_display::EyeStatus::EYE_STATUS_NORMAL) { // 0
     // 通常
     eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
     eye.update_look(look_x, look_y);
   } 
 
-  else if (eye_status == 1){
+  else if (eye_status == eye_display::EyeStatus::EYE_STATUS_BLINK) { // 1
     // 瞬き
     eye.blink_eye(look_x, look_y, blink_level);
     blink_level += 1;
@@ -133,7 +134,7 @@ void loop()
     }
   }
 
-  else if (eye_status == 2){
+  else if (eye_status == eye_display::EyeStatus::EYE_STATUS_SURPRISED) { // 2
     // 驚き
     if (surprised_level == 0){
       eye.ready_for_surprised_eye(path_image_surprised_iris_right);
@@ -146,7 +147,7 @@ void loop()
     }
   }
 
-  else if (eye_status == 3){
+  else if (eye_status == eye_display::EyeStatus::EYE_STATUS_SLEEPY) { // 3
     // 眠い
     eye.sleepy(look_x, look_y, sleepy_level);
     sleepy_level += 1;
@@ -156,7 +157,7 @@ void loop()
     }
   }
 
-  else if (eye_status == 4){
+  else if (eye_status == eye_display::EyeStatus::EYE_STATUS_ANGRY){ // 4
     // 怒り
     if (angry_level == 0){
       eye.ready_for_angry_eye(path_image_angry_upperlid_right);
@@ -169,7 +170,7 @@ void loop()
     }
   }
 
-  else if (eye_status == 5){
+  else if (eye_status == eye_display::EyeStatus::EYE_STATUS_SAD) { // 5
     // 悲しむ・困る
     if (sad_level == 0){
       eye.ready_for_sad_eye(path_image_sad_upperlid_right);
@@ -182,7 +183,7 @@ void loop()
     }
   }
 
-  else if (eye_status == 6) {
+  else if (eye_status == eye_display::EyeStatus::EYE_STATUS_HAPPY) { // 6
     // 喜ぶ
     if (happy_level == 0){
       eye.ready_for_happy_eye(path_image_happy_upperlid_right);
