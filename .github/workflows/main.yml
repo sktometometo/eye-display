@@ -1,0 +1,40 @@
+name: PlatformIO Build Workflow
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        target_project:
+          - simple_version
+          - rosserial_version
+    steps:
+    - uses: actions/checkout@v2
+    - name: Cache PlatformIO global ${{ matrix.target_project }}
+      uses: actions/cache@v2
+      with:
+        path: ~/.platformio
+        key: ${{ runner.os }}-platformio-global-${{ matrix.target_project }}-${{ hashFiles('${github.workspace}/${{ matrix.target_project }}/platformio.ini') }}
+        restore-keys: ${{ runner.os }}-platformio-global-${{ matrix.target_project }}-${{ hashFiles('${github.workspace}/${{ matrix.target_project }}/platformio.ini') }}
+    - name: Cache PlatformIO local ${{ matrix.target_project }}
+      uses: actions/cache@v2
+      with:
+        path: ${{ github.workspace }}/${{ matrix.target_project }}/.pio
+        key: ${{ runner.os }}-platformio-local-${{ matrix.target_project }}-${{ hashFiles('${github.workspace}/${{ matrix.target_project }}/platformio.ini') }}
+        restore-keys: ${{ runner.os }}-platformio-local-${{ matrix.target_project }}-${{ hashFiles('${github.workspace}/${{ matrix.target_project }}/platformio.ini') }}
+    - name: Update pip and install pip package
+      run: |
+        pip3 install pip --upgrade
+        pip3 install pyopenssl --upgrade
+        pip3 install platformio==6.1.11
+        pip3 uninstall em
+        pip3 install empy==3.3.4    
+    - name: build sketch ${{ matrix.target_project }}
+      run: |
+        pio run -d ${{ github.workspace }}/${{ matrix.target_project }}
