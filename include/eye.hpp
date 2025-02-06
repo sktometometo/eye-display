@@ -38,7 +38,7 @@ public:
   const static int max_happy_level = 20;
 
   void init(const char *path_jpg_eyeball, const char *path_jpg_iris, const char *path_jpg_upperlid, 
-            const int image_width, const int image_height, int rotation = 0)
+            const int image_width, const int image_height, int rotation = 0, bool invert_rl = false)
 
   {
     this->image_width = image_width;
@@ -47,38 +47,38 @@ public:
     lcd.init();
     lcd.setRotation(rotation);
 
-    // 目の部位を描写するSpriteを準備
+    // 目全体を描写するBufferとしてのSpriteを準備
     sprite_eye.createSprite(image_width, image_height);
     sprite_eye.fillScreen(TFT_WHITE);
-    sprite_eye.drawJpgFile(SPIFFS, path_jpg_eyeball);
 
-    // 目玉を描写するSpriteを準備
+    // 目の輪郭を描写するSpriteを準備
     sprite_eyeball.createSprite(image_width, image_height);
+    if (invert_rl) sprite_eyeball.setRotation(6);
     sprite_eyeball.fillScreen(TFT_WHITE);
     sprite_eyeball.drawJpgFile(SPIFFS, path_jpg_eyeball);
 
     // 上瞼を描写するSpriteを準備
     sprite_upperlid.createSprite(image_width, image_height);
+    if (invert_rl) sprite_upperlid.setRotation(6);
     sprite_upperlid.fillScreen(TFT_WHITE);
     const bool success_load_upperlid_image = sprite_upperlid.drawJpgFile(SPIFFS, path_jpg_upperlid); 
-    Serial.println(success_load_upperlid_image); // 上瞼の画像がloadできていることを確認
 
     // 虹彩を描写するSpriteを準備
     sprite_iris.createSprite(image_width, image_height);
+    if (invert_rl) sprite_iris.setRotation(6);
     sprite_iris.fillScreen(TFT_WHITE);
     const bool success_load_iris_image = sprite_iris.drawJpgFile(SPIFFS, path_jpg_iris);
-    Serial.println(success_load_iris_image);
 
     // 瞳孔を描写するSpriteを準備
     sprite_pupil.createSprite(image_width, image_height);
+    if (invert_rl) sprite_pupil.setRotation(6);
     sprite_pupil.fillScreen(TFT_WHITE);
-    sprite_pupil.fillCircle(50, 50, 30, TFT_BLACK);
-    
+
     // 光の反射を描画するSpriteを準備
     sprite_reflex.createSprite(image_width, image_height);
+    if (invert_rl) sprite_reflex.setRotation(6);
     sprite_reflex.fillScreen(TFT_WHITE);
-    sprite_reflex.fillCircle(40, 40, 6, TFT_LIGHTGRAY);
-    
+
     // lcdを準備
     lcd.setPivot(lcd.width() >> 1, lcd.height() >> 1);
     lcd.fillScreen(TFT_WHITE);
@@ -86,7 +86,7 @@ public:
     // zoom率を指定
     zoom_ratio = (float)lcd.width() / image_width;
     float ztmp = (float)lcd.height() / image_height;
-    
+
     if (zoom_ratio > ztmp)
     {
       zoom_ratio = ztmp;
