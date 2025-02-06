@@ -24,6 +24,19 @@ pip install platformio
 
 And then, you can build and upload the firmware to the device.
 
+It is recommended to put this repo in a catkin workspace.
+
+```bash
+mkdir ~/catkin_ws/src
+cd ~/catkin_ws
+catkin init
+cd ~/catkin_ws/src
+git clone https://github.com/sktometometo/eye_display.git
+rosdep install --from-paths . --ignore-src -y -r
+catkin build eye_display
+source ~/catkin_ws/devel/setup.bash
+```
+
 ### Simple demo
 
 
