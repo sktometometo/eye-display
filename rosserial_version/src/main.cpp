@@ -109,9 +109,9 @@ void setup()
 
 #if defined(USE_I2C)
 #if defined(EYE_RIGHT)
-  eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 1);
+  eye.init(path_image_eyeball, path_image_iris_right, path_image_upperlid_right, image_width, image_height, 1, true);
 #else
-  eye.init(path_image_eyeball, path_image_iris_left, path_image_upperlid_left, image_width, image_height, 5);
+  eye.init(path_image_eyeball, path_image_iris_right, path_image_upperlid_right, image_width, image_height, 1, false);
 #endif
   eye.update_look();
   xTaskCreatePinnedToCore(I2CTask, "I2C Task", 1024, NULL, 24, NULL, 0);
@@ -128,21 +128,10 @@ void setup()
   }
 
   bool mode_right;
+  int direction = 1;
   nh.getParam("~mode_right", &mode_right);
-  // bool mode_right;
-  // if (not nh.getParam("~mode_right", &mode_right))
-  if (mode_right)
-  {
-    // 右目
-    eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 1);
-    // nh.loginfo("right eye mode_right: %s", &mode_right);
-  }
-  else
-  {
-    // 左目
-    eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 1);
-    // nh.loginfo("left eye mode_right: %s", &mode_right);
-  }
+  nh.getParam("~direction", &direction);
+  eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, direction, not mode_right);
   eye.update_look();
 #endif
 }
