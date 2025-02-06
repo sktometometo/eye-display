@@ -1,9 +1,7 @@
-name: PlatformIO Build Workflow
+name: Cakin Build and PlatformIO Build Workflow
 
 on:
   push:
-    branches: [master]
-  pull_request:
     branches: [master]
 
 jobs:
@@ -14,8 +12,16 @@ jobs:
         target_project:
           - simple_version
           - rosserial_version
+    env:
+      CATKIN_WS: /home/runner/work/catkin_ws
     steps:
     - uses: actions/checkout@v2
+    - name: Cache apt
+      uses: actions/cache@v2
+      with:
+        path: /var/cache/apt/archives
+        key: ${{ runner.os }}-apt-${{ hashFiles('${GITHUB_WORKSPACE}/package.xml') }}
+        restore-keys: ${{ runner.os }}-apt-${{ hashFiles('${GITHUB_WORKSPACE}/package.xml') }}
     - name: Cache PlatformIO global ${{ matrix.target_project }}
       uses: actions/cache@v2
       with:
@@ -28,6 +34,12 @@ jobs:
         path: ${{ github.workspace }}/${{ matrix.target_project }}/.pio
         key: ${{ runner.os }}-platformio-local-${{ matrix.target_project }}-${{ hashFiles('${GITHUB_WORKSPACE}/${{ matrix.target_project }}/platformio.ini') }}
         restore-keys: ${{ runner.os }}-platformio-local-${{ matrix.target_project }}-${{ hashFiles('${GITHUB_WORKSPACE}/${{ matrix.target_project }}/platformio.ini') }}
+    - name: Setup ROS
+      uses: ros-tooling/setup-ros@v0.2
+      with:
+        required-ros-distributions: noetic
+    - name: Install catkin tool
+      run: sudo apt-get install python3-catkin-tools
     - name: Update pip and install pip package
       run: |
         pip3 install pip --upgrade
@@ -35,6 +47,25 @@ jobs:
         pip3 install platformio==6.1.11
         pip3 uninstall em
         pip3 install empy==3.3.4    
+    - name: Init workspace
+      run: |
+        source /opt/ros/noetic/setup.bash
+        mkdir -p ${CATKIN_WS}/src
+        ln -s ${{ github.workspace }} ${CATKIN_WS}/src/
+    - name: pre build
+      run: |
+        source /opt/ros/noetic/setup.bash
+        rosdep update
+        rosdep install -i -y --from-paths ./
+    - name: catkin build
+      run: |
+        source /opt/ros/noetic/setup.bash
+        cd ${CATKIN_WS}
+        catkin build
+    - name: Update ros_lib
+      run: |
+        source ${CATKIN_WS}/devel/setup.bash
+        rosrun eye_display update_ros_lib.sh
     - name: build sketch ${{ matrix.target_project }}
       run: |
         pio run -d ${{ github.workspace }}/${{ matrix.target_project }}
