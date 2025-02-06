@@ -3,7 +3,7 @@ name: Cakin Build and PlatformIO Build Workflow
 on:
   push:
     branches: [master]
-  pull_requests:
+  pull_request:
     branches: [master]
 
 jobs:
