@@ -28,7 +28,7 @@ void setup()
 
   delay(5000);
 
-  eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 1);
+  eye.init(path_image_eyeball, path_image_iris_right, NULL, NULL, path_image_upperlid_right, image_width, image_height, 1);
   eye.update_look();
 
   Serial.println("Start.");
