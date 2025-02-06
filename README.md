@@ -114,3 +114,11 @@ pio run -e <env name> -t upload --upload-port <port to device>
 ```
 
 Then you can control the device with I2C.
+
+### Description of direction
+
+![eye_display_direction](./doc/eye_display_direction.svg)]
+
+### How to update image
+
+![eye_layer_structure](./doc/eye_structure.svg)]
