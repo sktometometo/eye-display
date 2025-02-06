@@ -20,14 +20,14 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ~/.platformio
-        key: ${{ runner.os }}-platformio-global-${{ matrix.target_project }}-${{ hashFiles('${GITHUB_WORKSPACE}/${{ matrix.target_project }}/platformio.ini') }}
-        restore-keys: ${{ runner.os }}-platformio-global-${{ matrix.target_project }}-${{ hashFiles('${GITHUB_WORKSPACE}/${{ matrix.target_project }}/platformio.ini') }}
+        key: ${{ runner.os }}-platformio-global-${{ matrix.target_project }}-${{ hashFiles('${github.workspace}/${{ matrix.target_project }}/platformio.ini') }}
+        restore-keys: ${{ runner.os }}-platformio-global-${{ matrix.target_project }}-${{ hashFiles('${github.workspace}/${{ matrix.target_project }}/platformio.ini') }}
     - name: Cache PlatformIO local ${{ matrix.target_project }}
       uses: actions/cache@v2
       with:
         path: ${{ github.workspace }}/${{ matrix.target_project }}/.pio
-        key: ${{ runner.os }}-platformio-local-${{ matrix.target_project }}-${{ hashFiles('${GITHUB_WORKSPACE}/${{ matrix.target_project }}/platformio.ini') }}
-        restore-keys: ${{ runner.os }}-platformio-local-${{ matrix.target_project }}-${{ hashFiles('${GITHUB_WORKSPACE}/${{ matrix.target_project }}/platformio.ini') }}
+        key: ${{ runner.os }}-platformio-local-${{ matrix.target_project }}-${{ hashFiles('${github.workspace}/${{ matrix.target_project }}/platformio.ini') }}
+        restore-keys: ${{ runner.os }}-platformio-local-${{ matrix.target_project }}-${{ hashFiles('${github.workspace}/${{ matrix.target_project }}/platformio.ini') }}
     - name: Update pip and install pip package
       run: |
         pip3 install pip --upgrade

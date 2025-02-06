@@ -20,20 +20,20 @@ jobs:
       uses: actions/cache@v2
       with:
         path: /var/cache/apt/archives
-        key: ${{ runner.os }}-apt-${{ hashFiles('${GITHUB_WORKSPACE}/package.xml') }}
-        restore-keys: ${{ runner.os }}-apt-${{ hashFiles('${GITHUB_WORKSPACE}/package.xml') }}
+        key: ${{ runner.os }}-apt-${{ hashFiles('${github.workspace}/package.xml') }}
+        restore-keys: ${{ runner.os }}-apt-${{ hashFiles('${github.workspace}/package.xml') }}
     - name: Cache PlatformIO global ${{ matrix.target_project }}
       uses: actions/cache@v2
       with:
         path: ~/.platformio
-        key: ${{ runner.os }}-platformio-global-${{ matrix.target_project }}-${{ hashFiles('${GITHUB_WORKSPACE}/${{ matrix.target_project }}/platformio.ini') }}
-        restore-keys: ${{ runner.os }}-platformio-global-${{ matrix.target_project }}-${{ hashFiles('${GITHUB_WORKSPACE}/${{ matrix.target_project }}/platformio.ini') }}
+        key: ${{ runner.os }}-platformio-global-${{ matrix.target_project }}-${{ hashFiles('${github.workspace}/${{ matrix.target_project }}/platformio.ini') }}
+        restore-keys: ${{ runner.os }}-platformio-global-${{ matrix.target_project }}-${{ hashFiles('${github.workspace}/${{ matrix.target_project }}/platformio.ini') }}
     - name: Cache PlatformIO local ${{ matrix.target_project }}
       uses: actions/cache@v2
       with:
         path: ${{ github.workspace }}/${{ matrix.target_project }}/.pio
-        key: ${{ runner.os }}-platformio-local-${{ matrix.target_project }}-${{ hashFiles('${GITHUB_WORKSPACE}/${{ matrix.target_project }}/platformio.ini') }}
-        restore-keys: ${{ runner.os }}-platformio-local-${{ matrix.target_project }}-${{ hashFiles('${GITHUB_WORKSPACE}/${{ matrix.target_project }}/platformio.ini') }}
+        key: ${{ runner.os }}-platformio-local-${{ matrix.target_project }}-${{ hashFiles('${github.workspace}/${{ matrix.target_project }}/platformio.ini') }}
+        restore-keys: ${{ runner.os }}-platformio-local-${{ matrix.target_project }}-${{ hashFiles('${github.workspace}/${{ matrix.target_project }}/platformio.ini') }}
     - name: Setup ROS
       uses: ros-tooling/setup-ros@v0.2
       with:
