@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 import rospy
 from std_msgs.msg import UInt16
+from eye_display.msg import EyeStatus.msg
 
 
 def main():
     rospy.init_node("pub_eye_status")
     msg = UInt16()
-    
-    # 送信者を作成する。
+
     pub = rospy.Publisher("/eye_status", UInt16, queue_size=10)
 
     rate = rospy.Rate(10)
