@@ -50,57 +50,21 @@ void setup()
 
   delay(5000);
 
-  eye.init(path_image_outline, path_image_iris, NULL, NULL, //path_image_pupil, path_image_reflex,
+  eye.init(path_image_outline, path_image_iris, path_image_pupil, path_image_reflex,
           path_image_upperlid, image_width, image_height, 1);
   eye.update_look();
 
   Serial.println("Start.");
 }
 
-void listDir(fs::FS &fs, const char *dirname, uint8_t levels) {
-	Serial.printf("Listing directory: %s\r\n", dirname);
-
-	File root = fs.open(dirname);
-	if (!root) {
-		Serial.println("- failed to open directory");
-		return;
-	}
-	if (!root.isDirectory()) {
-		Serial.println(" - not a directory");
-		return;
-	}
-
-	File file = root.openNextFile();
-	while (file) {
-		if (file.isDirectory()) {
-			Serial.print("	DIR : ");
-			Serial.println(file.name());
-			if (levels) {
-				listDir(fs, file.path(), levels - 1);
-			}
-		} else {
-			Serial.print("	FILE: ");
-			Serial.print(file.name());
-			Serial.print("\tSIZE: ");
-			Serial.println(file.size());
-		}
-		file = root.openNextFile();
-	}
-}
-
 void loop()
 {
-  listDir(SPIFFS, "/", 0);
   bool success;
 
   // 通常
   Serial.println("Normal");
+  eye.load_eye_images(path_image_outline, path_image_iris, path_image_pupil, path_image_reflex, path_image_upperlid);
   float look_x, look_y;
-  if (not eye.load_eye_images(NULL, NULL, NULL, NULL, NULL)) { //ath_image_outline, path_image_iris, NULL, NULL, // path_image_pupil, path_image_reflex, path_image_upperlid)) {
-      Serial.println("Failed to load image");
-  } else {
-      Serial.println("Succeed to load iamge");
-  }
   for (int i=0; i<50; i++) {
       delay(20);
       look_x = 1.0 * sin(i * 0.1);
@@ -114,10 +78,8 @@ void loop()
 
   // まばたき
   Serial.println("Blink");
+  eye.load_eye_images(path_image_outline, path_image_iris, path_image_pupil, path_image_reflex, path_image_upperlid);
   int blink_level = 0;
-  if (not eye.load_eye_images(path_image_outline, path_image_iris, path_image_pupil, path_image_reflex, path_image_upperlid)) {
-      Serial.println("Failed to load image");
-  }
   for (int i=0; i<50; i++) {
       delay(20);
       blink_level = i % Eye::max_blink_level;
@@ -127,11 +89,9 @@ void loop()
 
   // 驚き
   Serial.println("Surprised");
+  eye.load_eye_images(path_image_outline_surprised, path_image_iris_surprised,
+          path_image_pupil_surprised, path_image_reflex_surprised, path_image_upperlid_surprised);
   int surprised_level = 0;
-  if (not eye.load_eye_images(path_image_outline_surprised, path_image_iris_surprised,
-          path_image_pupil_surprised, path_image_reflex_surprised, path_image_upperlid_surprised)) {
-      Serial.println("Failed to load image");
-  }
   for (int i=0; i<50; i++) {
       delay(20);
       surprised_level = i % Eye::max_surprised_level;
@@ -141,10 +101,8 @@ void loop()
 
   // 眠い
   Serial.println("Sleepy");
+  eye.load_eye_images(path_image_outline, path_image_iris, path_image_pupil, path_image_reflex, path_image_upperlid);
   int sleepy_level = 0;
-  if (not eye.load_eye_images(path_image_outline, path_image_iris, path_image_pupil, path_image_reflex, path_image_upperlid)) {
-      Serial.println("Failed to load image");
-  }
   for (int i=0; i<50; i++) {
       delay(20);
       sleepy_level = i & Eye::max_sleepy_level;
@@ -154,11 +112,9 @@ void loop()
 
   // 怒り
   Serial.println("Angry");
+  eye.load_eye_images(path_image_outline_angry, path_image_iris_angry,
+          path_image_pupil_angry, path_image_reflex_angry, path_image_upperlid_angry);
   int angry_level = 0;
-  if (eye.load_eye_images(path_image_outline_angry, path_image_iris_angry,
-          path_image_pupil_angry, path_image_reflex_angry, path_image_upperlid_angry)) {
-      Serial.println("Failed to load image");
-  }
   for (int i=0; i<50; i++) {
       delay(20);
       angry_level = i % Eye::max_angry_level;
@@ -168,11 +124,9 @@ void loop()
 
   // 哀しい
   Serial.println("Sad");
+  eye.load_eye_images(path_image_outline_sad, path_image_iris_sad,
+          path_image_pupil_sad, path_image_reflex_sad, path_image_upperlid_sad);
   int sad_level = 0;
-  if (eye.load_eye_images(path_image_outline_sad, path_image_iris_sad,
-          path_image_pupil_sad, path_image_reflex_sad, path_image_upperlid_sad)) {
-      Serial.println("Failed to load image");
-  }
   for (int i=0; i<50; i++) {
       delay(20);
       sad_level = i % Eye::max_sad_level;
@@ -182,11 +136,9 @@ void loop()
 
   // 楽しい
   Serial.println("Happy");
+  eye.load_eye_images(path_image_outline_happy, path_image_iris_happy,
+          path_image_pupil_happy, path_image_reflex_happy, path_image_upperlid_happy);
   int happy_level = 0;
-  if (eye.load_eye_images(path_image_outline_happy, path_image_iris_happy,
-          path_image_pupil_happy, path_image_reflex_happy, path_image_upperlid_happy)) {
-      Serial.println("Failed to load image");
-  }
   for (int i=0; i<50; i++) {
       delay(20);
       happy_level = i % Eye::max_happy_level;
