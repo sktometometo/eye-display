@@ -17,7 +17,7 @@ private:
 
   // Spriteを設定
   LGFX_Sprite sprite_eye;
-  LGFX_Sprite sprite_eyeball;
+  LGFX_Sprite sprite_outline;
   LGFX_Sprite sprite_iris;
   LGFX_Sprite sprite_pupil;
   LGFX_Sprite sprite_reflex;
@@ -37,9 +37,16 @@ public:
   const static int max_sad_level = 20;
   const static int max_happy_level = 20;
 
-  void init(const char *path_jpg_eyeball, const char *path_jpg_iris, const char *path_jpg_upperlid, 
-            const int image_width, const int image_height, int rotation = 0, bool invert_rl = false)
-
+  void init(
+          const char *path_jpg_outline,
+          const char *path_jpg_iris,
+          const char *path_jpg_pupil,
+          const char *path_jpg_reflex,
+          const char *path_jpg_upperlid,
+          const int image_width,
+          const int image_height,
+          int rotation = 0,
+          bool invert_rl = false)
   {
     this->image_width = image_width;
     this->image_height = image_height;
@@ -52,32 +59,34 @@ public:
     sprite_eye.fillScreen(TFT_WHITE);
 
     // 目の輪郭を描写するSpriteを準備
-    sprite_eyeball.createSprite(image_width, image_height);
-    if (invert_rl) sprite_eyeball.setRotation(6);
-    sprite_eyeball.fillScreen(TFT_WHITE);
-    sprite_eyeball.drawJpgFile(SPIFFS, path_jpg_eyeball);
-
-    // 上瞼を描写するSpriteを準備
-    sprite_upperlid.createSprite(image_width, image_height);
-    if (invert_rl) sprite_upperlid.setRotation(6);
-    sprite_upperlid.fillScreen(TFT_WHITE);
-    const bool success_load_upperlid_image = sprite_upperlid.drawJpgFile(SPIFFS, path_jpg_upperlid); 
+    sprite_outline.createSprite(image_width, image_height);
+    if (invert_rl) sprite_outline.setRotation(6);
+    sprite_outline.fillScreen(TFT_WHITE);
+    if (path_jpg_outline != NULL) sprite_outline.drawJpgFile(SPIFFS, path_jpg_outline);
 
     // 虹彩を描写するSpriteを準備
     sprite_iris.createSprite(image_width, image_height);
     if (invert_rl) sprite_iris.setRotation(6);
     sprite_iris.fillScreen(TFT_WHITE);
-    const bool success_load_iris_image = sprite_iris.drawJpgFile(SPIFFS, path_jpg_iris);
+    if (path_jpg_iris != NULL) sprite_iris.drawJpgFile(SPIFFS, path_jpg_iris);
 
     // 瞳孔を描写するSpriteを準備
     sprite_pupil.createSprite(image_width, image_height);
     if (invert_rl) sprite_pupil.setRotation(6);
     sprite_pupil.fillScreen(TFT_WHITE);
+    if (path_jpg_pupil != NULL) sprite_pupil.drawJpgFile(SPIFFS, path_jpg_pupil);
 
     // 光の反射を描画するSpriteを準備
     sprite_reflex.createSprite(image_width, image_height);
     if (invert_rl) sprite_reflex.setRotation(6);
     sprite_reflex.fillScreen(TFT_WHITE);
+    if (path_jpg_reflex != NULL) sprite_reflex.drawJpgFile(SPIFFS, path_jpg_reflex);
+
+    // 上瞼を描写するSpriteを準備
+    sprite_upperlid.createSprite(image_width, image_height);
+    if (invert_rl) sprite_upperlid.setRotation(6);
+    sprite_upperlid.fillScreen(TFT_WHITE);
+    if (path_jpg_reflex != NULL) sprite_upperlid.drawJpgFile(SPIFFS, path_jpg_upperlid); 
 
     // lcdを準備
     lcd.setPivot(lcd.width() >> 1, lcd.height() >> 1);
@@ -93,12 +102,42 @@ public:
     }
   }
 
+  bool load_eye_images(
+          const char *path_jpg_outline,
+          const char *path_jpg_iris,
+          const char *path_jpg_pupil,
+          const char *path_jpg_reflex,
+          const char *path_jpg_upperlid
+          )
+  {
+    bool success = true;
+
+    sprite_outline.fillScreen(TFT_WHITE);
+    if (path_jpg_outline != NULL) success = sprite_outline.drawJpgFile(SPIFFS, path_jpg_outline);
+    if (not success) return false;
+
+    sprite_iris.fillScreen(TFT_WHITE);
+    if (path_jpg_iris != NULL) success = sprite_iris.drawJpgFile(SPIFFS, path_jpg_iris);
+    if (not success) return false;
+
+    sprite_pupil.fillScreen(TFT_WHITE);
+    if (path_jpg_pupil != NULL) success = sprite_pupil.drawJpgFile(SPIFFS, path_jpg_pupil);
+    if (not success) return false;
+
+    sprite_reflex.fillScreen(TFT_WHITE);
+    if (path_jpg_reflex != NULL) success = sprite_reflex.drawJpgFile(SPIFFS, path_jpg_reflex);
+    if (not success) return false;
+
+    sprite_upperlid.fillScreen(TFT_WHITE);
+    if (path_jpg_reflex != NULL) success = sprite_upperlid.drawJpgFile(SPIFFS, path_jpg_upperlid); 
+    return success;
+  }
+
   // 通常の目を描画する準備
   void ready_for_normal_eye(const char *path_jpg_iris = "/white.jpg", const char *path_jpg_upperlid = "/white.jpg")
   {
     sprite_iris.fillScreen(TFT_WHITE);
     const bool success_load_iris_image = sprite_iris.drawJpgFile(SPIFFS, path_jpg_iris);
-    Serial.println(success_load_iris_image);
 
     sprite_pupil.fillScreen(TFT_WHITE);
     sprite_pupil.fillCircle(50, 50, 30, TFT_BLACK);
@@ -116,7 +155,6 @@ public:
   {
     sprite_iris.fillScreen(TFT_WHITE);
     const bool success_load_iris_image = sprite_iris.drawJpgFile(SPIFFS, path_jpg_surprised_iris);
-    Serial.println(success_load_iris_image);
 
     sprite_pupil.fillScreen(TFT_WHITE);
     sprite_pupil.fillCircle(image_height / 2, image_width / 2, 15, TFT_BLACK);
@@ -130,8 +168,6 @@ public:
   {
     sprite_upperlid.fillScreen(TFT_WHITE);
     const bool success_load_angry_upperlid_image = sprite_upperlid.drawJpgFile(SPIFFS, path_jpg_angry_upperlid);
-    Serial.println("angry_eye");
-    Serial.println(success_load_angry_upperlid_image);
   }
 
   // 悲しい目を描画する準備
@@ -139,17 +175,12 @@ public:
   {
     sprite_upperlid.fillScreen(TFT_WHITE);
     const bool success_load_sad_upperlid_image = sprite_upperlid.drawJpgFile(SPIFFS, path_jpg_sad_upperlid);
-    Serial.println("sad_eye");
-    Serial.println(success_load_sad_upperlid_image);
   }
 
   // 喜んでいる目を描画する準備
-  void ready_for_happy_eye(const char *path_jpg_happy_upperlid = "/white.jpg")
+  void ready_for_happy_eye(const char *path_jpg_happy_reflex = "/white.jpg")
   {
-    sprite_upperlid.fillScreen(TFT_WHITE);
-    const bool success_load_happy_upperlid_image = sprite_upperlid.drawJpgFile(SPIFFS, path_jpg_happy_upperlid);
-    Serial.println("happy_eye");
-    Serial.println(success_load_happy_upperlid_image);
+    load_eye_images(NULL, NULL, NULL, path_jpg_happy_reflex, NULL);
   }
 
   // 通常の目の描画
@@ -160,7 +191,7 @@ public:
 
     sprite_eye.clear();
     sprite_eye.fillScreen(TFT_WHITE);
-    sprite_eyeball.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
+    sprite_outline.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
     sprite_iris.pushSprite(&sprite_eye, (int)(scale * dx), (int)(scale * dy), TFT_WHITE);
 
     sprite_pupil.pushSprite(&sprite_eye, (int)(scale * dx), (int)(scale * dy), TFT_WHITE); // 瞳孔をランダムに動かす
@@ -179,8 +210,8 @@ public:
     
     sprite_eye.clear();
     sprite_eye.fillScreen(TFT_WHITE);
-    sprite_eyeball.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
-    sprite_iris.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
+    sprite_outline.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
+    sprite_iris.pushSprite(&sprite_eye, (int)(scale * dx), (int)(scale * dy), TFT_WHITE);
     
     sprite_pupil.pushSprite(&sprite_eye, (int)(scale * dx), (int)(scale * dy), TFT_WHITE); // 瞳孔をランダムに動かす
     sprite_reflex.pushSprite(&sprite_eye, (int)(scale * dx) + rx, (int)(scale * dy) + ry, TFT_WHITE); // 光の反射をランダムに動かす
@@ -200,9 +231,9 @@ public:
 
     sprite_eye.clear();
     sprite_eye.fillScreen(TFT_WHITE);
-    sprite_eyeball.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
+    sprite_outline.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
 
-    sprite_iris.pushSprite(&sprite_eye, 0, 5, TFT_WHITE);
+    sprite_iris.pushSprite(&sprite_eye, (int)(scale * dx), (int)(scale * dy), TFT_WHITE);
     sprite_pupil.pushSprite(&sprite_eye, (int)(scale * dx), (int)(scale * dy), TFT_WHITE);
     sprite_reflex.pushSprite(&sprite_eye, (int)(scale * dx) + rx, (int)(scale * dy) + ry, TFT_WHITE);
     sprite_upperlid.pushSprite(&sprite_eye, 0, upperlid_y_arr[surprised_level], TFT_WHITE);
@@ -219,7 +250,7 @@ public:
     
     sprite_eye.clear();
     sprite_eye.fillScreen(TFT_WHITE);
-    sprite_eyeball.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
+    sprite_outline.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
     sprite_iris.pushSprite(&sprite_eye, -10, 15, TFT_WHITE);
     
     sprite_pupil.pushSprite(&sprite_eye, (int)(scale * dx) - 10, (int)(scale * dy) + 15, TFT_WHITE);
@@ -236,7 +267,7 @@ public:
     
     sprite_eye.clear();
     sprite_eye.fillScreen(TFT_WHITE);
-    sprite_eyeball.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
+    sprite_outline.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
     sprite_iris.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
     
     sprite_pupil.pushSprite(&sprite_eye, (int)(scale * dx), (int)(scale * dy), TFT_WHITE); // 瞳孔をランダムに動かす
@@ -255,7 +286,7 @@ public:
     
     sprite_eye.clear();
     sprite_eye.fillScreen(TFT_WHITE);
-    sprite_eyeball.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
+    sprite_outline.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
     sprite_iris.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
     
     sprite_pupil.pushSprite(&sprite_eye, (int)(scale * dx), (int)(scale * dy), TFT_WHITE); // 瞳孔をランダムに動かす
@@ -274,15 +305,17 @@ public:
     
     sprite_eye.clear();
     sprite_eye.fillScreen(TFT_WHITE);
-    sprite_eyeball.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
-    
-    sprite_upperlid.pushSprite(&sprite_eye, rx, ry, TFT_WHITE);
+    sprite_outline.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
+    sprite_iris.pushSprite(&sprite_eye, 0, 0, TFT_WHITE);
+    sprite_pupil.pushSprite(&sprite_eye, (int)(scale * dx), (int)(scale * dy), TFT_WHITE); // 瞳孔をランダムに動かす
+    sprite_reflex.pushSprite(&sprite_eye, (int)(scale * dx) + rx, (int)(scale * dy) + ry + 10, TFT_WHITE); // 光の反射をランダムに動かす
+    sprite_upperlid.pushSprite(&sprite_eye, 0, -130, TFT_WHITE); 
 
     draw_updated_image();
   }
 
   void draw_updated_image()
   {
-    sprite_eye.pushRotateZoom(&lcd, lcd.width() >> 1, lcd.height() >> 1, 0, zoom_ratio, zoom_ratio, TFT_WHITE);
+    sprite_eye.pushRotateZoom(&lcd, lcd.width() >> 1, lcd.height() >> 1, 0, zoom_ratio, zoom_ratio);
   }
 };
