@@ -56,35 +56,49 @@ Then simple_version will work
 
 Please replace `stampc3` with `stamps3` if you use type 2 device.
 
-### rossserial/I2C version
+### rossserial version (rosserial or I2C)
 
 If you want to control the device with rosserial or I2C, please use `rosserial_version` firmware.
 
+#### How to build and upload
 
-#### rosserial version
+To build the `rosserial_version` firmware, you can use `build.py` script.
+
+This script requires a config yaml file and eye layer images.
+This repo has a sample project, please see [sample_project](./sample_project/).
+
+If you want to build the firmware with the sample project, you can use the following command.
 
 ```bash
-cd rosserial_version
-pio run -e stampc3-ros
-pio run -e stampc3-ros -t uploadfs --upload-port <port to device>
-pio run -e stampc3-ros -t upload --upload-port <port to device>
+roscd eye_display/sample_project
+rosrun eye_display build.py ./sample.yaml --env stampc3 --port <port to device>
 ```
 
 (Please replace `stampc3` with `stamps3` if you use type 2 device.)
 
-And run serial node
+#### Run demo with a rosserial version
+
+After building and uploading the firmware, you can control the device with rosserial.
+
+This repository has a sample node to control the device.
+
+First, please launch a rosserial node.
 
 ```bash
-roscore
+roslaunch eye_display demo.launch port:=<port to device> mode_right:=<true or false>
+```
+
+Then you can control the device with the demo scripts.
+
+```bash
+rosrun eye_display demo_move_eye.py
 ```
 
 ```bash
-rosrun rosserial_python serial_node.py _port:=<port to device> _baud:=57600
+rosrun eye_display pub_eye_status.py
 ```
 
-Then rosserial_version will work.
-
-You can control pupil position by publish a message to "/serial_node/look_at" topic.
+You can also directly control pupil position by publish a message to "/serial_node/look_at" topic.
 
 ```bash
 rostopic pub -1 /serial_node/look_at geometry_msgs/Point "{x: 1.0, y: 1.0, z: 0.0}"
@@ -120,10 +134,9 @@ If you want to control the device through I2C bus, please use following env.
 - `stamps3-i2c-left`: Stamp C3 device on left eye
 
 ```bash
-cd rosserial_version
-pio run -e <env name>
-pio run -e <env name> -t uploadfs --upload-port <port to device>
-pio run -e <env name> -t upload --upload-port <port to device>
+roscd eye_display/sample_project
+rosrun eye_display build.py ./sample.yaml --env <env name> --port <port to device>
+
 ```
 
 Then you can control the device with I2C.
