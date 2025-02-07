@@ -26,27 +26,23 @@ constexpr int SCL_PIN = 9;
 constexpr int I2C_SLAVE_ADDR = 0x42;
 
 const int image_width = 139;
-// const int image_height = 120;
 const int image_height = 139;
 
-const char path_image_eyeball[] = "/eyeball.jpg";
+const char path_image_outline[] = "/outline.jpg";
+const char path_image_iris[] = "/iris.jpg";
+const char path_image_pupil[] = "/pupil.jpg";
+const char path_image_reflex[] = "/reflex.jpg";
+const char path_image_upperlid[] = "/upperlid.jpg";
 
-const char path_image_iris_right[] = "/iris_right.jpg";
-const char path_image_surprised_iris_right[] = "/iris_surprised_right.jpg";
-const char path_image_upperlid_right[] = "/upperlid.jpg";
-const char path_image_angry_upperlid_right[] = "/upperlid_leftside_down.jpg";
-const char path_image_sad_upperlid_right[] = "/upperlid_rightside_down.jpg";
-const char path_image_happy_upperlid_right[] = "/upperlid_happy_right.jpg";
+const char path_image_iris_surprised[] = "/iris_surprised.jpg";
+const char path_image_pupil_surprised[] = "/pupil_surprised.jpg";
+const char path_image_reflex_surprised[] = "/reflex_surprised.jpg";
 
-const char path_image_iris_left[] = "/iris_left.jpg";
-const char path_image_surprised_iris_left[] = "/iris_surprised_left.jpg";
-const char path_image_upperlid_left[] = "/upperlid.jpg";
-const char path_image_angry_upperlid_left[] = "/upperlid_rightside_down.jpg";
-const char path_image_sad_upperlid_left[] = "/upperlid_leftside_down.jpg";
-const char path_image_happy_upperlid_left[] =  "/upperlid_happy_left.jpg";
+const char path_image_reflex_happy[] = "/reflex_happy.jpg";
 
 // eye_status ... 0: 通常, 1: 瞬き, 2: 驚き, 3: 眠い, 4: 怒る, 5: 悲しむ・困る, 6: 嬉しい...
 int eye_status = 0;
+int pre_eye_status = 0;
 int blink_level = 0; int max_blink_level = 6;
 int surprised_level = 0; int max_surprised_level = 16;
 int sleepy_level = 0; int max_sleepy_level = 10;
@@ -90,13 +86,17 @@ void callback_look_at(const geometry_msgs::Point &msg)
 {
   look_x = (float)msg.x;
   look_y = (float)msg.y;
-  nh.loginfo("in the callback look_at func");
+  char buf[128];
+  snprintf(buf, sizeof(buf), "Look at (%f, %f)", look_x, look_y);
+  nh.loginfo(buf);
 }
 
 void callback_emotion(const std_msgs::UInt16 &msg)
 {
-  nh.loginfo("in the callback emotion func");
   eye_status = msg.data;
+  char buf[128];
+  snprintf(buf, sizeof(buf), "Status updated: %d", eye_status);
+  nh.loginfo(buf);
 }
 
 void setup()
@@ -109,9 +109,17 @@ void setup()
 
 #if defined(USE_I2C)
 #if defined(EYE_RIGHT)
-  eye.init(path_image_eyeball, path_image_iris_right, NULL, NULL, path_image_upperlid_right, image_width, image_height, 1, true);
+  eye.init(path_image_outline, path_image_iris, path_image_pupil,
+          path_image_reflex, path_image_upperlid,
+          path_image_iris_surprised, path_image_pupil_surprised, path_image_reflex_surprised,
+          path_image_reflex_happy,
+          image_width, image_height, 1, true);
 #else
-  eye.init(path_image_eyeball, path_image_iris_right, NULL, NULL, path_image_upperlid_right, image_width, image_height, 1, false);
+  eye.init(path_image_outline, path_image_iris, path_image_pupil,
+          path_image_reflex, path_image_upperlid,
+          path_image_iris_surprised, path_image_pupil_surprised, path_image_reflex_surprised,
+          path_image_reflex_happy,
+          image_width, image_height, 1, false);
 #endif
   eye.update_look();
   xTaskCreatePinnedToCore(I2CTask, "I2C Task", 1024, NULL, 24, NULL, 0);
@@ -131,92 +139,90 @@ void setup()
   int direction = 1;
   nh.getParam("~mode_right", &mode_right);
   nh.getParam("~direction", &direction);
-  eye.init(path_image_eyeball, path_image_iris_right, NULL, NULL, path_image_upperlid_right, image_width, image_height, direction, not mode_right);
+  eye.init(path_image_outline, path_image_iris, path_image_pupil,
+          path_image_reflex, path_image_upperlid,
+          path_image_iris_surprised, path_image_pupil_surprised, path_image_reflex_surprised,
+          path_image_reflex_happy,
+          image_width, image_height, direction, not mode_right);
   eye.update_look();
 #endif
 }
 
 void loop()
 {
-  delay(100);
+  delay(20);
+
+  char buf[128];
+  snprintf(buf, sizeof(buf), "eye_status: %d, pre_eye_status :%d", eye_status, pre_eye_status);
+  nh.loginfo(buf);
 
   if (eye_status == eye_display::EyeStatus::EYE_STATUS_NORMAL) { // 0
     // 通常
-    eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
+    if (pre_eye_status != eye_status) eye.ready_for_normal_eye();
     eye.update_look(look_x, look_y);
   } 
 
   else if (eye_status == eye_display::EyeStatus::EYE_STATUS_BLINK) { // 1
     // 瞬き
+    if (pre_eye_status != eye_status) eye.ready_for_blink_eye();
     eye.blink_eye(look_x, look_y, blink_level);
     blink_level += 1;
     if (blink_level == max_blink_level){
       blink_level = 0;
-      eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
     }
   }
 
   else if (eye_status == eye_display::EyeStatus::EYE_STATUS_SURPRISED) { // 2
     // 驚き
-    if (surprised_level == 0){
-      eye.ready_for_surprised_eye(path_image_surprised_iris_right);
-    }
+    if (pre_eye_status != eye_status) eye.ready_for_surprised_eye();
     eye.surprised(look_x, look_y, surprised_level);
     surprised_level += 1;
     if (surprised_level == max_surprised_level){
       surprised_level = 0;
-      eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
     }
   }
 
   else if (eye_status == eye_display::EyeStatus::EYE_STATUS_SLEEPY) { // 3
     // 眠い
+    if (pre_eye_status != eye_status) eye.ready_for_sleepy_eye();
     eye.sleepy(look_x, look_y, sleepy_level);
     sleepy_level += 1;
     if (sleepy_level == max_sleepy_level){
       sleepy_level = 0;
-      eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
     }
   }
 
   else if (eye_status == eye_display::EyeStatus::EYE_STATUS_ANGRY){ // 4
     // 怒り
-    if (angry_level == 0){
-      eye.ready_for_angry_eye(path_image_angry_upperlid_right);
-    }
+    if (pre_eye_status != eye_status) eye.ready_for_angry_eye();
     eye.angry(look_x, look_y, angry_level);
     angry_level += 1;
     if (angry_level == max_angry_level){
       angry_level = 0;
-      eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
     }
   }
 
   else if (eye_status == eye_display::EyeStatus::EYE_STATUS_SAD) { // 5
     // 悲しむ・困る
-    if (sad_level == 0){
-      eye.ready_for_sad_eye(path_image_sad_upperlid_right);
-    }
+    if (pre_eye_status != eye_status) eye.ready_for_sad_eye();
     eye.sad(look_x, look_y, sad_level);
     sad_level += 1;
     if (sad_level == max_sad_level){
       sad_level = 0;
-      eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
     }
   }
 
   else if (eye_status == eye_display::EyeStatus::EYE_STATUS_HAPPY) { // 6
     // 喜ぶ
-    if (happy_level == 0){
-      eye.ready_for_happy_eye(path_image_happy_upperlid_right);
-    }
+    if (pre_eye_status != eye_status) eye.ready_for_happy_eye();
     eye.happy(look_x, look_y, happy_level);
     happy_level += 1;
     if (happy_level == max_happy_level){
       happy_level = 0;
-      eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
     }
   }
+
+  pre_eye_status = eye_status;
 
   nh.spinOnce();
 }
