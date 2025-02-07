@@ -12,13 +12,13 @@ MODES_AND_NAMES = [
         (EyeStatus.EYE_STATUS_ANGRY, "Angry"),
         (EyeStatus.EYE_STATUS_SAD, "Sad"),
         (EyeStatus.EYE_STATUS_HAPPY, "Happy"),
-        (EyeStatus.EYE_STATUS_TROUBLED, "Troubled"),
-        (EyeStatus.EYE_STATUS_DELIGHTED, "Delighted"),
-        (EyeStatus.EYE_STATUS_EXPECTING, "Expecting"),
-        (EyeStatus.EYE_STATUS_HEART, "Heart"),
-        (EyeStatus.EYE_STATUS_SHINE, "Shine"),
-        (EyeStatus.EYE_STATUS_FLUSTRATED, "Flustrated"),
-        (EyeStatus.EYE_STATUS_BORING, "Boring"),
+#        (EyeStatus.EYE_STATUS_TROUBLED, "Troubled"),
+#        (EyeStatus.EYE_STATUS_DELIGHTED, "Delighted"),
+#        (EyeStatus.EYE_STATUS_EXPECTING, "Expecting"),
+#        (EyeStatus.EYE_STATUS_HEART, "Heart"),
+#        (EyeStatus.EYE_STATUS_SHINE, "Shine"),
+#        (EyeStatus.EYE_STATUS_FLUSTRATED, "Flustrated"),
+#        (EyeStatus.EYE_STATUS_BORING, "Boring"),
     ]
 
 

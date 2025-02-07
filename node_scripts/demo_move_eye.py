@@ -6,7 +6,7 @@ from geometry_msgs.msg import Point
 
 def main():
     rospy.init_node("pub_eye_status")
-    scale = rospy.get_param('~scale', 1.0)
+    scale = rospy.get_param('~scale', 10.0)
     msg = Point()
     pub = rospy.Publisher("/eye_display/look_at", Point, queue_size=1)
     rate = rospy.Rate(1)

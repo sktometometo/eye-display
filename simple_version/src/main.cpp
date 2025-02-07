@@ -14,29 +14,11 @@ const char path_image_pupil[] = "/pupil.jpg";
 const char path_image_reflex[] = "/reflex.jpg";
 const char path_image_upperlid[] = "/upperlid.jpg";
 
-const char path_image_outline_surprised[] = "/outline.jpg";
 const char path_image_iris_surprised[] = "/iris_surprised.jpg";
 const char path_image_pupil_surprised[] = "/pupil_surprised.jpg";
 const char path_image_reflex_surprised[] = "/reflex_surprised.jpg";
-const char path_image_upperlid_surprised[] = "/upperlid.jpg";
 
-const char path_image_outline_angry[] = "/outline.jpg";
-const char path_image_iris_angry[] = "/iris.jpg";
-const char path_image_pupil_angry[] = "/pupil.jpg";
-const char path_image_reflex_angry[] = "/reflex.jpg";
-const char path_image_upperlid_angry[] = "/upperlid_angry.jpg";
-
-const char path_image_outline_sad[] = "/outline.jpg";
-const char path_image_iris_sad[] = "/iris.jpg";
-const char path_image_pupil_sad[] = "/pupil.jpg";
-const char path_image_reflex_sad[] = "/reflex.jpg";
-const char path_image_upperlid_sad[] = "/upperlid_sad.jpg";
-
-const char path_image_outline_happy[] = "/outline.jpg";
-const char path_image_iris_happy[] = "/white.jpg";
-const char path_image_pupil_happy[] = "/white.jpg";
 const char path_image_reflex_happy[] = "/reflex_happy.jpg";
-const char path_image_upperlid_happy[] = "/white.jpg";
 
 static Eye eye;
 
@@ -50,8 +32,11 @@ void setup()
 
   delay(5000);
 
-  eye.init(path_image_outline, path_image_iris, path_image_pupil, path_image_reflex,
-          path_image_upperlid, image_width, image_height, 1);
+  eye.init(path_image_outline, path_image_iris, path_image_pupil,
+          path_image_reflex, path_image_upperlid,
+          path_image_iris_surprised, path_image_pupil_surprised, path_image_reflex_surprised,
+          path_image_reflex_happy,
+          image_width, image_height, 1);
   eye.update_look();
 
   Serial.println("Start.");
@@ -63,12 +48,12 @@ void loop()
 
   // 通常
   Serial.println("Normal");
-  eye.load_eye_images(path_image_outline, path_image_iris, path_image_pupil, path_image_reflex, path_image_upperlid);
+  eye.ready_for_normal_eye();
   float look_x, look_y;
   for (int i=0; i<50; i++) {
       delay(20);
-      look_x = 1.0 * sin(i * 0.1);
-      look_y = 1.0 * cos(i * 0.1) ;
+      look_x = 10.0 * sin(i * 0.1);
+      look_y = 10.0 * cos(i * 0.1) ;
       eye.update_look(look_x, look_y);
   }
   look_x = 0;
@@ -78,7 +63,7 @@ void loop()
 
   // まばたき
   Serial.println("Blink");
-  eye.load_eye_images(path_image_outline, path_image_iris, path_image_pupil, path_image_reflex, path_image_upperlid);
+  eye.ready_for_blink_eye();
   int blink_level = 0;
   for (int i=0; i<50; i++) {
       delay(20);
@@ -89,8 +74,7 @@ void loop()
 
   // 驚き
   Serial.println("Surprised");
-  eye.load_eye_images(path_image_outline_surprised, path_image_iris_surprised,
-          path_image_pupil_surprised, path_image_reflex_surprised, path_image_upperlid_surprised);
+  eye.ready_for_surprised_eye();
   int surprised_level = 0;
   for (int i=0; i<50; i++) {
       delay(20);
@@ -101,7 +85,7 @@ void loop()
 
   // 眠い
   Serial.println("Sleepy");
-  eye.load_eye_images(path_image_outline, path_image_iris, path_image_pupil, path_image_reflex, path_image_upperlid);
+  eye.ready_for_sleepy_eye();
   int sleepy_level = 0;
   for (int i=0; i<50; i++) {
       delay(20);
@@ -112,8 +96,7 @@ void loop()
 
   // 怒り
   Serial.println("Angry");
-  eye.load_eye_images(path_image_outline_angry, path_image_iris_angry,
-          path_image_pupil_angry, path_image_reflex_angry, path_image_upperlid_angry);
+  eye.ready_for_angry_eye();
   int angry_level = 0;
   for (int i=0; i<50; i++) {
       delay(20);
@@ -124,8 +107,7 @@ void loop()
 
   // 哀しい
   Serial.println("Sad");
-  eye.load_eye_images(path_image_outline_sad, path_image_iris_sad,
-          path_image_pupil_sad, path_image_reflex_sad, path_image_upperlid_sad);
+  eye.ready_for_sad_eye();
   int sad_level = 0;
   for (int i=0; i<50; i++) {
       delay(20);
@@ -136,8 +118,7 @@ void loop()
 
   // 楽しい
   Serial.println("Happy");
-  eye.load_eye_images(path_image_outline_happy, path_image_iris_happy,
-          path_image_pupil_happy, path_image_reflex_happy, path_image_upperlid_happy);
+  eye.ready_for_happy_eye();
   int happy_level = 0;
   for (int i=0; i<50; i++) {
       delay(20);
