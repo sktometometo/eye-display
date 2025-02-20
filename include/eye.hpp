@@ -35,6 +35,10 @@ private:
   int image_width;
   int image_height;
 
+  float look_x = 0.0f;
+  float look_y = 0.0f;
+  float upperlid_y = 0.0f;
+
 public:
   void init(const int image_width, const int image_height, int rotation = 0)
   {
@@ -110,8 +114,22 @@ public:
     draw_image_file(sprite_upperlid, eye_asset.upperlid);  // upperlid
   }
 
-  // 視線方向を変更する
-  void set_gaze_direction(float look_x = 0.0, float look_y = 0.0, float scale = 10.0, float random_scale = 5.0 ){
+   // 視線方向を変更（値を設定するだけ）
+  void set_gaze_direction(float look_x, float look_y)
+  {
+    this->look_x = look_x;
+    this->look_y = look_y;
+  }
+
+  // まぶたの位置を変更（値を設定するだけ）
+  void set_upperlid_position(float upperlid_y)
+  {
+    this->upperlid_y = upperlid_y;
+  }
+
+  // 目の状態を更新する
+  void update(float scale = 10.0, float random_scale = 5.0)
+  {
     long rx = (int)(random_scale * random(100) / 100);
     long ry = (int)(random_scale * random(100) / 100);
 
@@ -121,14 +139,8 @@ public:
     sprite_iris.pushSprite(&sprite_eye, look_x, look_y, TFT_WHITE);
     sprite_pupil.pushSprite(&sprite_eye, look_x, look_y, TFT_WHITE); 
     sprite_reflex.pushSprite(&sprite_eye, look_x + rx, look_y + ry, TFT_WHITE);
-  }
-
-  // まぶたの位置を変更する
-  void set_upperlid_position(float upperlid_y){
     sprite_upperlid.pushSprite(&sprite_eye, 0, upperlid_y, TFT_WHITE);
-  }
 
-  void draw_updated_image(){
     sprite_eye.pushRotateZoom(&lcd, lcd.width() >> 1, lcd.height() >> 1, 0, zoom_ratio, zoom_ratio, TFT_WHITE);
   }
 };
@@ -163,7 +175,7 @@ public:
         float upperlid_y = upperlid_positions[current_frame];
 
         eyeManager.set_upperlid_position(upperlid_y);
-        eyeManager.draw_updated_image();
+        eyeManager.update();
       }
     }
 };
