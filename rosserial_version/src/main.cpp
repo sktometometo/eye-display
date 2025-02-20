@@ -33,6 +33,7 @@ ros::Subscriber<std_msgs::UInt16> sub_eye_status("eye_status", &callback_emotion
 
 int eye_status = 0;
 bool emotion_changed_flag = true;
+static int frame = 0;
 
 void callback_look_at(const geometry_msgs::Point &msg)
 {
@@ -87,17 +88,17 @@ void setup()
     eye.init(image_width, image_height, 1);
   }
   eye.set_gaze_direction(look_x, look_y);
-  emotion.set_emotion(eye_status, emotion_changed_flag, 0); 
+  emotion.set_emotion(eye_status); 
+  emotion.update_emotion(frame);
 }
-
-static int frame = 0;
 
 void loop()
 {
   delay(100);
   frame ++;
   eye.set_gaze_direction(look_x, look_y);
-  emotion.set_emotion(eye_status, emotion_changed_flag, frame); 
+  emotion.set_emotion(eye_status);
+  emotion.update_emotion(frame);
   nh.spinOnce();
   char log_msg[50];
   sprintf(log_msg, "Eye status: %d, Emotion changed: %s", eye_status, emotion_changed_flag ? "true" : "false");
