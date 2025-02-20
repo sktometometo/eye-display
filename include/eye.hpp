@@ -110,18 +110,6 @@ public:
     draw_image_file(sprite_upperlid, eye_asset.upperlid);  // upperlid
   }
 
-  // 画像の位置を確定する
-  // 画像の位置が変わらないときは実行しない
-  void set_picture_position(float eyeball_x, float eyeball_y, float iris_x, float iris_y, float pupil_x, float pupil_y, float reflex_x, float reflex_y, float upperlid_x, float upperlid_y){
-    // sprite_eye.clear();
-    // sprite_eye.fillScreen(TFT_WHITE);
-    sprite_eyeball.pushSprite(&sprite_eye, eyeball_x, eyeball_y, TFT_WHITE);
-    sprite_iris.pushSprite(&sprite_eye, iris_x, iris_y, TFT_WHITE);
-    sprite_pupil.pushSprite(&sprite_eye, pupil_x, pupil_y, TFT_WHITE);
-    sprite_reflex.pushSprite(&sprite_eye, reflex_x, reflex_y, TFT_WHITE);
-    sprite_upperlid.pushSprite(&sprite_eye, upperlid_x, upperlid_y, TFT_WHITE);
-  }  
-
   // 視線方向を変更する
   void set_gaze_direction(float look_x = 0.0, float look_y = 0.0, float scale = 10.0, float random_scale = 5.0 ){
     long rx = (int)(random_scale * random(100) / 100);
