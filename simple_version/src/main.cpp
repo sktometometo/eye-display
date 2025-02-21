@@ -8,6 +8,7 @@
 const int image_width = 139;
 const int image_height = 139;
 
+<<<<<<< HEAD
 const char path_image_eyeball[] = "/eyeball.jpg";
 
 const char path_image_iris_right[] = "/iris_right.jpg";
@@ -25,20 +26,33 @@ int sleepy_level = 0; int max_sleepy_level = 10;
 int angry_level = 0; int max_angry_level = 20;
 int sad_level = 0; int max_sad_level = 20;
 int happy_level = 0; int max_happy_level = 20;
+=======
+const char path_image_outline[] = "/outline.jpg";
+const char path_image_iris[] = "/iris.jpg";
+const char path_image_pupil[] = "/pupil.jpg";
+const char path_image_reflex[] = "/reflex.jpg";
+const char path_image_upperlid[] = "/upperlid.jpg";
+
+const char path_image_iris_surprised[] = "/iris_surprised.jpg";
+const char path_image_pupil_surprised[] = "/pupil_surprised.jpg";
+const char path_image_reflex_surprised[] = "/reflex_surprised.jpg";
+
+const char path_image_reflex_happy[] = "/reflex_happy.jpg";
+>>>>>>> shinjo/master
 
 static Eye eye;
 
 void setup()
 {
   Serial.begin(115200);
-
   pinMode(TFT_BL, OUTPUT);
   digitalWrite(TFT_BL, HIGH);
-
   SPIFFS.begin();
+  Serial.println("Initialized.");
 
   delay(5000);
 
+<<<<<<< HEAD
   String mode = "right";
   if (mode == "right")
   {
@@ -49,23 +63,33 @@ void setup()
     eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 5);
   }
 
+=======
+  eye.init(path_image_outline, path_image_iris, path_image_pupil,
+          path_image_reflex, path_image_upperlid,
+          path_image_iris_surprised, path_image_pupil_surprised, path_image_reflex_surprised,
+          path_image_reflex_happy,
+          image_width, image_height, 1);
+>>>>>>> shinjo/master
   eye.update_look();
-}
 
-static int i = 0;
+  Serial.println("Start.");
+}
 
 void loop()
 {
-  delay(100);
-  i++;
-  if (i % 50 == 0){
-    Serial.print(eye_status);
-    eye_status += 1;
-    if (eye_status == 7)
-    {
-      eye_status = 0;
-    }
+  bool success;
+
+  // 通常
+  Serial.println("Normal");
+  eye.ready_for_normal_eye();
+  float look_x, look_y;
+  for (int i=0; i<50; i++) {
+      delay(20);
+      look_x = 10.0 * sin(i * 0.1);
+      look_y = 10.0 * cos(i * 0.1) ;
+      eye.update_look(look_x, look_y);
   }
+<<<<<<< HEAD
 
   float look_x = 0.3 * sin(i * 0.1);
   float look_y = 0.3 * cos(i * 0.1) ;
@@ -83,72 +107,75 @@ void loop()
       blink_level = 0;
       // eye_status = 0;
     }
-  }
+=======
+  look_x = 0;
+  look_y = 0;
+  eye.update_look(look_x, look_y);
+  delay(1000);
 
-  else if (eye_status == 2){
-    // 驚き
-    if (surprised_level == 0){
-      eye.ready_for_surprised_eye(path_image_surprised_iris_right);
-    }
-    eye.surprised(look_x, look_y, surprised_level);
-    surprised_level += 1;
-    if (surprised_level == max_surprised_level){
-      surprised_level = 0;
-      // eye_status = 0;
-      eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
-    }
+  // まばたき
+  Serial.println("Blink");
+  eye.ready_for_blink_eye();
+  int blink_level = 0;
+  for (int i=0; i<50; i++) {
+      delay(20);
+      blink_level = i % Eye::max_blink_level;
+      eye.blink_eye(look_x, look_y, blink_level);
+>>>>>>> shinjo/master
   }
+  delay(1000);
 
-  else if (eye_status == 3){
-    // 眠い
-    eye.sleepy(look_x, look_y, sleepy_level);
-    sleepy_level += 1;
-    if (sleepy_level == max_sleepy_level){
-      sleepy_level = 0;
-      // eye_status = 0;
-      eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
-    }
+  // 驚き
+  Serial.println("Surprised");
+  eye.ready_for_surprised_eye();
+  int surprised_level = 0;
+  for (int i=0; i<50; i++) {
+      delay(20);
+      surprised_level = i % Eye::max_surprised_level;
+      eye.surprised(look_x, look_y, surprised_level);
   }
+  delay(1000);
 
-  else if (eye_status == 4){
-    // 怒り
-    if (angry_level == 0){
-      eye.ready_for_angry_eye(path_image_angry_upperlid_right);
-    }
-    eye.angry(look_x, look_y, angry_level);
-    angry_level += 1;
-    if (angry_level == max_angry_level){
-      angry_level = 0;
-      eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
-    }
+  // 眠い
+  Serial.println("Sleepy");
+  eye.ready_for_sleepy_eye();
+  int sleepy_level = 0;
+  for (int i=0; i<50; i++) {
+      delay(20);
+      sleepy_level = i & Eye::max_sleepy_level;
+      eye.sleepy(look_x, look_y, sleepy_level);
   }
+  delay(1000);
 
-  else if (eye_status == 5){
-    // 悲しむ・困る
-    if (sad_level == 0){
-      eye.ready_for_sad_eye(path_image_sad_upperlid_right);
-    }
-    eye.sad(look_x, look_y, sad_level);
-    sad_level += 1;
-    if (sad_level == max_sad_level){
-      sad_level = 0;
-      eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
-    }
+  // 怒り
+  Serial.println("Angry");
+  eye.ready_for_angry_eye();
+  int angry_level = 0;
+  for (int i=0; i<50; i++) {
+      delay(20);
+      angry_level = i % Eye::max_angry_level;
+      eye.angry(look_x, look_y, angry_level);
   }
+  delay(1000);
 
-  else if (eye_status == 6) {
-    // 喜ぶ
-    if (happy_level == 0){
-      eye.ready_for_happy_eye(path_image_happy_upperlid_right);
-    }
-    eye.happy(look_x, look_y, happy_level);
-    happy_level += 1;
-    if (happy_level == max_happy_level){
-      happy_level = 0;
-      eye.ready_for_normal_eye(path_image_iris_right, path_image_upperlid_right);
-    }
+  // 哀しい
+  Serial.println("Sad");
+  eye.ready_for_sad_eye();
+  int sad_level = 0;
+  for (int i=0; i<50; i++) {
+      delay(20);
+      sad_level = i % Eye::max_sad_level;
+      eye.sad(look_x, look_y);
   }
+  delay(1000);
 
-  eye.draw_updated_image();
-  Serial.printf("look_x: %f, look_y: %f\n", look_x, look_y);
+  // 楽しい
+  Serial.println("Happy");
+  eye.ready_for_happy_eye();
+  int happy_level = 0;
+  for (int i=0; i<50; i++) {
+      delay(20);
+      happy_level = i % Eye::max_happy_level;
+      eye.happy(look_x, look_y);
+  }
 }
