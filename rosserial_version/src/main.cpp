@@ -89,7 +89,7 @@ void setup()
   }
   eye.set_gaze_direction(look_x, look_y);
   emotion.set_emotion(eye_status); 
-  emotion.update_emotion(frame);
+  emotion.update_emotion();
 }
 
 void loop()
@@ -98,7 +98,7 @@ void loop()
   frame ++;
   eye.set_gaze_direction(look_x, look_y);
   emotion.set_emotion(eye_status);
-  emotion.update_emotion(frame);
+  emotion.update_emotion();
   nh.spinOnce();
   char log_msg[50];
   sprintf(log_msg, "Eye status: %d, Emotion changed: %s", eye_status, emotion_changed_flag ? "true" : "false");

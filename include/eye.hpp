@@ -165,7 +165,7 @@ public:
       }
     }
 
-    void update_emotion(int frame) {
+    void update_emotion() {
       float upperlid_y = upperlid_position_map[current_eye_status][frame % upperlid_position_map[current_eye_status].size()];
       eyeManager.set_upperlid_position(upperlid_y);
       eyeManager.update();
