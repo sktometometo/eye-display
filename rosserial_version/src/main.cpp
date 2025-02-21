@@ -2,6 +2,7 @@
 #include <math.h>
 
 #include "eye.hpp"
+#include "emotion.hpp"
 
 #if defined(STAMPS3)
 #include "ArduinoHWCDCHardware.h"

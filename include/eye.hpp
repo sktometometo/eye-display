@@ -144,31 +144,3 @@ public:
     sprite_eye.pushRotateZoom(&lcd, lcd.width() >> 1, lcd.height() >> 1, 0, zoom_ratio, zoom_ratio, TFT_WHITE);
   }
 };
-
-class EmotionManager
-{
-private:
-    EyeManager& eyeManager; // EyeManager の参照を保持
-    int current_eye_status = -1;
-    int frame = 0;
-
-public:
-    // コンストラクタで EyeManager の参照を受け取る
-    EmotionManager(EyeManager& manager) : eyeManager(manager) {}
-
-    // 感情ごとの表示設定
-    void set_emotion(int eye_status) {
-      if (current_eye_status != eye_status && eye_assets_map.find(eye_status) != eye_assets_map.end()) {
-        current_eye_status = eye_status;
-        eyeManager.set_picture_files_asset(eye_assets_map[eye_status]);
-        frame = 0;
-      }
-    }
-
-    void update_emotion() {
-      float upperlid_y = upperlid_position_map[current_eye_status][frame % upperlid_position_map[current_eye_status].size()];
-      eyeManager.set_upperlid_position(upperlid_y);
-      eyeManager.update();
-      frame ++;
-    }
-};
