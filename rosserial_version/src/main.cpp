@@ -52,6 +52,9 @@ int angry_level = 0; int max_angry_level = 20;
 int sad_level = 0; int max_sad_level = 20;
 int happy_level = 0; int max_happy_level = 20;
 
+//char upperlid_position_string[16];
+
+
 float look_x = 0;
 float look_y = 0;
 
@@ -137,33 +140,97 @@ void setup()
     delay(1000);
   }
 
+  char log_msg[50];
   bool mode_right;
   int direction = 1;
   if (nh.getParam("~mode_right", &mode_right)) {
-    nh.loginfo(mode_right ? "mode_right is true" : "mode_right is false");
+    nh.loginfo(mode_right ? "Read rosparam : mode_right is true" : "mode_right is false");
   } else {
     nh.loginfo("Failed to get mode_right parameter");
   }
+
   nh.getParam("~direction", &direction);
-  char log_msg[50];
-  sprintf(log_msg, "direction is %d", direction);
+  sprintf(log_msg, "Read rosparam : direction is %d", direction);
   nh.loginfo(log_msg);
-  // load upperlid_position_map
-  //std::map<int, std::vector<float>> upperlid_position_map;
-  char upperlid_position_string[256] = "test";
-  char *upperlid_position_string_ptr[1] = {upperlid_position_string};
-  nh.loginfo(upperlid_position_string_ptr[0]);
-  nh.getParam("~upperlid_position_map", upperlid_position_string_ptr);
-  //nh.getParam("~direction", upperlid_position_string_ptr);
-  nh.loginfo(upperlid_position_string_ptr[0]);
-  StaticJsonDocument<256> upperlid_positions;
-  deserializeJson(upperlid_positions, upperlid_position_string);
-  float happy_0 = upperlid_positions["happy"][0];
-  {
-    char log_msg[50];
-    sprintf(log_msg, "happy-0 is %f", happy_0);
+
+  //// plan 1
+  char eye_asset_map_str[512];
+  char *eye_asset_map_str_ptr[1] = {eye_asset_map_str};
+  nh.getParam("~eye_asset_map", eye_asset_map_str_ptr);
+  sprintf(log_msg, "Read rosparam : eye_asset_map is %s", eye_asset_map_str);
+  nh.loginfo(log_msg);
+
+  //DynamicJsonDocument eye_asset_map_doc(2048);
+  StaticJsonDocument<2049> eye_asset_map_doc;
+  deserializeJson(eye_asset_map_doc, eye_asset_map_str);
+
+  for(auto & eye_asset: eye_asset_map) {
+    JsonArray arr = eye_asset_map_doc[eye_asset.first.c_str()].as<JsonArray>();
+    if ( arr.size() > 0 ) {
+      EyeAsset *asset = &(eye_asset.second);
+      asset->upperlid_position.resize(0);
+      for (JsonVariant value : arr) {
+	asset->upperlid_position.push_back(value.as<float>());
+      }
+    } else {
+      char log_msg[128];
+      sprintf(log_msg, "eye_asset_map does not have '%s' data", eye_asset.first.c_str());
+      nh.logwarn(log_msg);
+    }
+  }
+
+  // display map data
+  for(auto const& eye_asset: eye_asset_map) {
+    char log_msg[256];
+    sprintf(log_msg, "%10s :", eye_asset.first.c_str());
+    for (float pos_y : eye_asset.second.upperlid_position) {
+      sprintf(log_msg, "%s %6.1f", log_msg, pos_y);
+    }
     nh.loginfo(log_msg);
   }
+
+  //// plan 2
+  for(auto & eye_asset: eye_asset_map) {
+    ((EyeAsset *)&(eye_asset.second))->upperlid_position.resize(0); // for debug
+    char eye_asset_map_str[512];
+    char *eye_asset_map_str_ptr[1] = {eye_asset_map_str};
+
+    char eye_asset_map_key[128];
+    sprintf(eye_asset_map_key, "~%s_eye_asset", eye_asset.first.c_str());
+
+    nh.getParam(eye_asset_map_key, eye_asset_map_str_ptr);
+    sprintf(log_msg, "Read rosparam : %s is %s", eye_asset_map_key, eye_asset_map_str);
+    nh.loginfo(log_msg);
+
+    //DynamicJsonDocument eye_asset_map_doc(2048);
+    StaticJsonDocument<2049> eye_asset_map_doc;
+    deserializeJson(eye_asset_map_doc, eye_asset_map_str);
+
+    JsonArray arr = eye_asset_map_doc["upperlid_position"].as<JsonArray>();
+    if ( arr.size() > 0 ) {
+      EyeAsset *asset = &(eye_asset.second);
+      asset->upperlid_position.resize(0);
+      for (JsonVariant value : arr) {
+	asset->upperlid_position.push_back(value.as<float>());
+      }
+    } else {
+      char log_msg[128];
+      sprintf(log_msg, "eye_asset_map does not have '%s' data", eye_asset.first.c_str());
+      nh.logwarn(log_msg);
+    }
+  }
+
+  // display map data
+  for(auto const& eye_asset: eye_asset_map) {
+    char log_msg[256];
+    sprintf(log_msg, "%10s :", eye_asset.first.c_str());
+    for (float pos_y : eye_asset.second.upperlid_position) {
+      sprintf(log_msg, "%s %6.1f", log_msg, pos_y);
+    }
+    nh.loginfo(log_msg);
+  }
+  //////
+
   eye.init(path_image_outline, path_image_iris, path_image_pupil,
           path_image_reflex, path_image_upperlid,
           path_image_iris_surprised, path_image_pupil_surprised, path_image_reflex_surprised,

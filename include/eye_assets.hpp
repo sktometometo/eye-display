@@ -21,3 +21,15 @@ std::map<int, std::vector<float>> upperlid_position_map = {
   {6, {0}},
 };
 
+struct EyeAsset {
+  const char* dummy = nullptr;
+  std::vector<float> upperlid_position = {};
+};
+std::map<std::string, EyeAsset> eye_asset_map = {{"normal", EyeAsset()},
+						 {"blink", EyeAsset()},
+						 {"surprised", EyeAsset()},
+						 {"sleepy", EyeAsset()},
+						 {"angry", EyeAsset()},
+						 {"sad", EyeAsset()},
+						 {"happy", EyeAsset()}};
+
