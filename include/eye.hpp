@@ -18,6 +18,9 @@
 #include <lgfx_round_lcd_stamp_c3.hpp>
 #endif
 
+extern void print_log(const char *);
+
+
 class EyeManager
 {
 private:
@@ -172,6 +175,28 @@ public:
     }
   }
 
+  bool draw_image_file(LGFX_Sprite& sprite, const char* filePath)
+  {
+    //return sprite.drawJpgFile(SPIFFS, filePath);
+    std::string pathStr(filePath);
+    std::string extension = pathStr.substr(pathStr.find_last_of('.') + 1);
+
+    if (extension == "jpg" || extension == "jpeg") {
+      char log_msg[50];
+      sprintf(log_msg, "loading jpeg: %s", filePath);
+      print_log(log_msg);
+
+      return sprite.drawJpgFile(SPIFFS, filePath);
+    } else if (extension == "png") {
+      char log_msg[50];
+      sprintf(log_msg, "loading png: %s", filePath);
+      print_log(log_msg);
+
+      return sprite.drawPngFile(SPIFFS, filePath);
+    }
+    return false;
+  }
+
    // 視線方向を変更（値を設定するだけ）
   void set_gaze_direction(float look_x, float look_y)
   {
@@ -196,14 +221,14 @@ public:
   {
     if (path_jpg_outline != NULL) {
         sprite_outline.fillScreen(TFT_WHITE);
-        if (not sprite_outline.drawJpgFile(SPIFFS, path_jpg_outline)) {
+        if (not draw_image_file(sprite_outline, path_jpg_outline)) {
             sprite_outline.fillScreen(TFT_WHITE);
         }
     }
 
     if (path_jpg_iris != NULL) {
         sprite_iris.fillScreen(TFT_WHITE);
-        if (not sprite_iris.drawJpgFile(SPIFFS, path_jpg_iris)) {
+        if (not draw_image_file(sprite_iris, path_jpg_iris)) {
             sprite_iris.fillScreen(TFT_WHITE);
         }
     }
@@ -211,21 +236,21 @@ public:
 
     if (path_jpg_pupil != NULL) {
         sprite_pupil.fillScreen(TFT_WHITE);
-        if (not sprite_pupil.drawJpgFile(SPIFFS, path_jpg_pupil)) {
+        if (not draw_image_file(sprite_pupil, path_jpg_pupil)) {
             sprite_pupil.fillScreen(TFT_WHITE);
         }
     }
 
     if (path_jpg_reflex != NULL) {
         sprite_reflex.fillScreen(TFT_WHITE);
-        if (not sprite_reflex.drawJpgFile(SPIFFS, path_jpg_reflex)) {
+        if (not draw_image_file(sprite_reflex, path_jpg_reflex)) {
             sprite_reflex.fillScreen(TFT_WHITE);
         }
     }
 
     if (path_jpg_upperlid != NULL) {
         sprite_upperlid.fillScreen(TFT_WHITE);
-        if (not sprite_upperlid.drawJpgFile(SPIFFS, path_jpg_upperlid)) {
+        if (not draw_image_file(sprite_upperlid, path_jpg_upperlid)) {
             sprite_upperlid.fillScreen(TFT_WHITE);
         }
     }
@@ -234,6 +259,14 @@ public:
   // 通常の目を描画する準備
   void ready_for_normal_eye(const char *path_jpg_iris = NULL, const char *path_jpg_upperlid = NULL)
   {
+    this->load_eye_images(NULL, NULL, NULL, NULL, NULL);
+    return ;
+    // this->load_eye_images("/outline.jpg",
+    //                       "/iris.jpg",
+    //                       "/pupil.jpg",
+    //                       "/reflex.jpg",
+    //                       "/upperlid.jpg");
+    // return ;
     this->load_eye_images(
             this->path_jpg_outline.c_str(),
             path_jpg_iris == NULL ? this->path_jpg_iris.c_str() : path_jpg_iris,

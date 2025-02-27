@@ -20,11 +20,14 @@
 #include <lgfx_round_lcd_stamp_c3.hpp>
 #endif
 
+extern void print_log(const char *);
+
 class EmotionManager
 {
 private:
     EyeManager& eyeManager; // EyeManager の参照を保持
     int eye_status = -1;
+    std::string eye_status_str;
     int frame = 0;
 
 public:
@@ -39,30 +42,65 @@ public:
       eye_status = received_eye_status;
       switch ( eye_status ) {
       case eye_display::EyeStatus::EYE_STATUS_NORMAL:
-	eyeManager.ready_for_normal_eye();
+        eye_status_str = "normal";
+	//eyeManager.ready_for_normal_eye();
 	break;
       case eye_display::EyeStatus::EYE_STATUS_BLINK:
-	eyeManager.ready_for_blink_eye();
+        eye_status_str = "blink";
+	//eyeManager.ready_for_blink_eye();
 	break;
       case eye_display::EyeStatus::EYE_STATUS_SURPRISED:
-	eyeManager.ready_for_surprised_eye();
+        eye_status_str = "surprised";
+	//eyeManager.ready_for_surprised_eye();
 	break;
       case eye_display::EyeStatus::EYE_STATUS_SLEEPY:
-	eyeManager.ready_for_sleepy_eye();
+        eye_status_str = "sleepy";
+	//eyeManager.ready_for_sleepy_eye();
 	break;
       case eye_display::EyeStatus::EYE_STATUS_ANGRY:
-	eyeManager.ready_for_angry_eye();
+        eye_status_str = "angry";
+	//eyeManager.ready_for_angry_eye();
 	break;
       case eye_display::EyeStatus::EYE_STATUS_SAD:
-	eyeManager.ready_for_sad_eye();
+        eye_status_str = "sad";
+	//eyeManager.ready_for_sad_eye();
 	break;
       case eye_display::EyeStatus::EYE_STATUS_HAPPY:
-	eyeManager.ready_for_happy_eye();
+        eye_status_str = "happy";
+	//eyeManager.ready_for_happy_eye();
 	break;
       default:
 	return -1;
       }
       frame = 0;
+      print_log(eye_status_str.c_str());
+      //eyeManager.ready_for_normal_eye();
+      EyeAsset* asset = &(eye_asset_map[eye_status_str.c_str()]);
+      // eyeManager.load_eye_images(NULL, NULL, NULL, NULL, NULL);
+      eyeManager.load_eye_images(asset->path_outline,
+                                 asset->path_iris,
+                                 asset->path_pupil,
+                                 asset->path_reflex,
+                                 asset->path_upperlid);
+      return 0;
+      // eyeManager.ready_for_normal_eye();
+      // return 0;
+      // eyeManager.load_eye_images(NULL,
+      //                            NULL,
+      //                            NULL,
+      //                            NULL,
+      //                            NULL);
+      // eyeManager.load_eye_images("/outline.jpg",
+      //                            "/outline.jpg",
+      //                            "/outline.jpg",
+      //                            "/outline.jpg",
+      //                            "/outline.jpg");
+      // return 0;
+      // eyeManager.load_eye_images(asset->path_outline,
+      //                            asset->path_iris,
+      //                            asset->path_pupil,
+      //                            asset->path_reflex,
+      //                            asset->path_upperlid);
       return 0;
     }
 
@@ -71,7 +109,9 @@ public:
     }
 
     void update_emotion() {
-      float upperlid_y = upperlid_position_map[eye_status][frame % upperlid_position_map[eye_status].size()];
+      //float upperlid_y = upperlid_position_map[eye_status][frame % upperlid_position_map[eye_status].size()];
+      EyeAsset* asset = &(eye_asset_map[eye_status_str.c_str()]);
+      float upperlid_y = asset->upperlid_position[frame % asset->upperlid_position.size()];
       eyeManager.update_look(0, 0, 0, upperlid_y);  // dx, dy, dx_upperlid, dy_upperlid, dtheta_upperlid
       frame ++;
     }

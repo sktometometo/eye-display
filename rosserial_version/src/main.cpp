@@ -154,6 +154,7 @@ void setup()
   nh.loginfo(log_msg);
 
   //// plan 1
+#if 0
   char eye_asset_map_str[512];
   char *eye_asset_map_str_ptr[1] = {eye_asset_map_str};
   nh.getParam("~eye_asset_map", eye_asset_map_str_ptr);
@@ -178,7 +179,7 @@ void setup()
       nh.logwarn(log_msg);
     }
   }
-
+#endif
   // display map data
   for(auto const& eye_asset: eye_asset_map) {
     char log_msg[256];
@@ -206,9 +207,15 @@ void setup()
     StaticJsonDocument<2049> eye_asset_map_doc;
     deserializeJson(eye_asset_map_doc, eye_asset_map_str);
 
+    EyeAsset *asset = &(eye_asset.second);
+    if ( eye_asset_map_doc["path_upperlid"] ) { String s = eye_asset_map_doc["path_upperlid"].as<String>(); asset->path_upperlid = (char *)malloc(s.length()+1); s.toCharArray((char *)(asset->path_upperlid), s.length()+1); }
+    if ( eye_asset_map_doc["path_outline"] )   { String s = eye_asset_map_doc["path_outline"].as<String>(); asset->path_outline = (char *)malloc(s.length()+1); s.toCharArray((char *)(asset->path_outline), s.length()+1); }
+    if ( eye_asset_map_doc["path_iris"] )   { String s = eye_asset_map_doc["path_iris"].as<String>(); asset->path_iris = (char *)malloc(s.length()+1); s.toCharArray((char *)(asset->path_iris), s.length()+1); }
+    if ( eye_asset_map_doc["path_pupil"] )   { String s = eye_asset_map_doc["path_pupil"].as<String>(); asset->path_pupil = (char *)malloc(s.length()+1); s.toCharArray((char *)(asset->path_pupil), s.length()+1); }
+    if ( eye_asset_map_doc["path_reflex"] )   { String s = eye_asset_map_doc["path_reflex"].as<String>(); asset->path_reflex = (char *)malloc(s.length()+1); s.toCharArray((char *)(asset->path_reflex), s.length()+1); }
+    // read array
     JsonArray arr = eye_asset_map_doc["upperlid_position"].as<JsonArray>();
     if ( arr.size() > 0 ) {
-      EyeAsset *asset = &(eye_asset.second);
       asset->upperlid_position.resize(0);
       for (JsonVariant value : arr) {
 	asset->upperlid_position.push_back(value.as<float>());
@@ -228,6 +235,11 @@ void setup()
       sprintf(log_msg, "%s %6.1f", log_msg, pos_y);
     }
     nh.loginfo(log_msg);
+    nh.loginfo(eye_asset.second.path_outline);
+    nh.loginfo(eye_asset.second.path_iris);
+    nh.loginfo(eye_asset.second.path_pupil);
+    nh.loginfo(eye_asset.second.path_reflex);
+    nh.loginfo(eye_asset.second.path_upperlid);
   }
   //////
 
@@ -256,6 +268,11 @@ void loop()
   sprintf(log_msg, "Eye status: %d", emotion.get_emotion());
   nh.loginfo(log_msg);
 }
+
+void print_log(const char* str){
+  nh.loginfo(str);
+}
+
 
 #if defined(USE_I2C)
 void receiveEvent(int howMany) {

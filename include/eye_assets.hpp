@@ -10,6 +10,7 @@ struct EyeAsset {
 #endif
 
 // EDIT HERE: まぶたのアニメーションを設定
+/*
 std::map<int, std::vector<float>> upperlid_position_map = {
   {0, {-130}},
   //  {1, {-130, -130, 0, 0, -130, -130}},
@@ -20,10 +21,16 @@ std::map<int, std::vector<float>> upperlid_position_map = {
   {5, {0}},
   {6, {0}},
 };
+*/
 
 struct EyeAsset {
   const char* dummy = nullptr;
-  std::vector<float> upperlid_position = {};
+  const char* path_outline = "/outline.jpg";    // static
+  const char* path_iris = "/iris.jpg";          // set_gaze_direction(x,y) to set position
+  const char* path_pupil = "/pupil.jpg";        //  move along with iris
+  const char* path_reflex = "/reflex.jpg" ;     //  move along with puppil + random motion
+  const char* path_upperlid = "/upperlid.jpg";  // use upperlid_position_map to set y-axis motoin
+  std::vector<float> upperlid_position = {}; // upperlid = motion layer
 };
 std::map<std::string, EyeAsset> eye_asset_map = {{"normal", EyeAsset()},
 						 {"blink", EyeAsset()},
