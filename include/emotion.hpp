@@ -33,7 +33,7 @@ public:
 
   // emotionに応じて画像セットを読み込む
     int set_emotion(int received_eye_status = 0) {
-      if (eye_status == received_eye_status || eye_assets_map.find(received_eye_status) == eye_assets_map.end()) {
+      if (eye_status == received_eye_status) {
         return 1;
       }
       eye_status = received_eye_status;
