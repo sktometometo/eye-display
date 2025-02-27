@@ -15,9 +15,14 @@
             baud: $(arg baud)
             mode_right: $(arg mode_right)
             direction: $(arg direction)
-            upperlid_position_map:
-            - happy : [1,2,3]
-            - sad : [-1,-2,-3]
+            eye_asset_map: '{normal: [-130], blink: [-130, -130, 0, 0, -130, -130], surprised: [-130, -130, -130, -130, 0, 0, -130, -130, -130, -130, 0, -130, -130, 0, -130, -130], sleepy: [-70, -70, -60, 0, 0, 0, -60, -70, -70, -70], angry: [-10.0], sad: [0.0], happy: [0.0]}'
+            normal_eye_asset: '{upperlid_position: [-130]}'
+            blink_eye_asset: '{upperlid_position: [-130, -130, 0, 0, -130, -130]}'
+            surprised_eye_asset: '{upperlid_position: [-130, -130, -130, -130, 0, 0, -130, -130, -130, -130, 0, -130, -130, 0, -130, -130]}'
+            sleepy_eye_asset: '{upperlid_position: [-70, -70, -60, 0, 0, 0, -60, -70, -70, -70]}'
+            angry_eye_asset: '{upperlid_position: [-10.0]}'
+            sad_eye_asset: '{upperlid_position: [0.0]}'
+            happy_eye_asset: '{upperlid_position: [0.0]}'
         </rosparam>
     </node>
 </launch>

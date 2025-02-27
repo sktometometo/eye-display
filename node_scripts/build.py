@@ -46,7 +46,9 @@ def load_param(filepath: str) -> Dict[str, str]:
 
 
 def copy_layer_image(source: str, target: str):
-    os.system(f"convert {source} -background white -resize 139x139 -flatten {target}")
+    ret = os.system(f"convert {source} -background white -resize 139x139 -flatten {target}")
+    if ret != 0:
+        raise SystemExit("Error: could not run convert command correctly (try apt install imagemagick), please check 'convert' command is installed or {source} and {target} file exists".format(source, target))
 
 
 def run_platformio_project(env: str, port: str):
