@@ -32,10 +32,6 @@ ros::NodeHandle_<ArduinoHardware> nh;
 ros::Subscriber<geometry_msgs::Point> sub_point("~look_at", &callback_look_at);
 ros::Subscriber<std_msgs::UInt16> sub_eye_status("eye_status", &callback_emotion);
 
-int eye_status = 0;
-bool emotion_changed_flag = true;
-static int frame = 0;
-
 void callback_look_at(const geometry_msgs::Point &msg)
 {
   look_x = (float)msg.x;
@@ -46,8 +42,7 @@ void callback_look_at(const geometry_msgs::Point &msg)
 void callback_emotion(const std_msgs::UInt16 &msg)
 {
   nh.loginfo("in the callback emotion func");
-  eye_status = msg.data;
-  emotion_changed_flag = true;
+  emotion.set_emotion(msg.data);
 }
 
 void setup()
@@ -89,19 +84,18 @@ void setup()
     eye.init(image_width, image_height, 1);
   }
   eye.set_gaze_direction(look_x, look_y);
-  emotion.set_emotion(eye_status); 
+  emotion.set_emotion(); // emotionの初期化
   emotion.update_emotion();
 }
 
 void loop()
 {
   delay(100);
-  frame ++;
+
   eye.set_gaze_direction(look_x, look_y);
-  emotion.set_emotion(eye_status);
   emotion.update_emotion();
   nh.spinOnce();
   char log_msg[50];
-  sprintf(log_msg, "Eye status: %d, Emotion changed: %s", eye_status, emotion_changed_flag ? "true" : "false");
+  sprintf(log_msg, "Eye status: %d", emotion.get_emotion());
   nh.loginfo(log_msg);
 }
