@@ -24,18 +24,19 @@ class EmotionManager
 {
 private:
     EyeManager& eyeManager; // EyeManager の参照を保持
-    int current_eye_status = -1;
+    int eye_status = -1;
     int frame = 0;
 
 public:
-    // コンストラクタで EyeManager の参照を受け取る
+  // コンストラクタで EyeManager の参照を受け取る
     EmotionManager(EyeManager& manager) : eyeManager(manager) {}
 
-    // 感情ごとの表示設定
-    int set_emotion(int eye_status) {
-      if ( current_eye_status == eye_status ) {
-	return 1;
+  // emotionに応じて画像セットを読み込む
+    int set_emotion(int received_eye_status = 0) {
+      if (eye_status == received_eye_status || eye_assets_map.find(received_eye_status) == eye_assets_map.end()) {
+        return 1;
       }
+      eye_status = received_eye_status;
       switch ( eye_status ) {
       case eye_display::EyeStatus::EYE_STATUS_NORMAL:
 	eyeManager.ready_for_normal_eye();
@@ -61,13 +62,16 @@ public:
       default:
 	return -1;
       }
-      current_eye_status = eye_status;
       frame = 0;
       return 0;
     }
 
+    int get_emotion(){
+      return eye_status;
+    }
+
     void update_emotion() {
-      float upperlid_y = upperlid_position_map[current_eye_status][frame % upperlid_position_map[current_eye_status].size()];
+      float upperlid_y = upperlid_position_map[eye_status][frame % upperlid_position_map[eye_status].size()];
       eyeManager.update_look(0, 0, 0, upperlid_y);  // dx, dy, dx_upperlid, dy_upperlid, dtheta_upperlid
       frame ++;
     }

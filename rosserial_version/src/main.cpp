@@ -95,9 +95,9 @@ void callback_look_at(const geometry_msgs::Point &msg)
 
 void callback_emotion(const std_msgs::UInt16 &msg)
 {
-  eye_status = msg.data;
+  emotion.set_emotion(msg.data);
   char buf[128];
-  snprintf(buf, sizeof(buf), "Status updated: %d", eye_status);
+  snprintf(buf, sizeof(buf), "Status updated: %d", msg.data);
   nh.loginfo(buf);
 }
 
@@ -164,109 +164,30 @@ void setup()
     sprintf(log_msg, "happy-0 is %f", happy_0);
     nh.loginfo(log_msg);
   }
+
   eye.init(path_image_outline, path_image_iris, path_image_pupil,
           path_image_reflex, path_image_upperlid,
           path_image_iris_surprised, path_image_pupil_surprised, path_image_reflex_surprised,
           path_image_reflex_happy,
           image_width, image_height, direction, not mode_right);
-  emotion.set_emotion(eye_status); 
+
+  eye.set_gaze_direction(look_x, look_y);
+  emotion.set_emotion(); // emotionの初期化
   emotion.update_emotion();
 #endif
 }
 
 void loop()
 {
-
-  //delay(100);
-  delay(20);
-
-  char buf[128];
-  snprintf(buf, sizeof(buf), "eye_status: %d, pre_eye_status :%d", eye_status, pre_eye_status);
-  nh.loginfo(buf);
+  delay(100);
 
   eye.set_gaze_direction(look_x, look_y);
-  if ( emotion.set_emotion(eye_status) < 0 ) {
-    char buf[128];
-    snprintf(buf, sizeof(buf), "Undefined EyeStatus (%d)", eye_status);
-    nh.logerror(buf);
-  }
   emotion.update_emotion();
 
-  //eye.ready_for_normal_eye();
-  //eye.update_look(look_x, look_y);
-  /*
-  if (eye_status == eye_display::EyeStatus::EYE_STATUS_NORMAL) { // 0
-    // 通常
-    if (pre_eye_status != eye_status) eye.ready_for_normal_eye();
-    eye.update_look(look_x, look_y);
-  } 
-
-  else if (eye_status == eye_display::EyeStatus::EYE_STATUS_BLINK) { // 1
-    // 瞬き
-    if (pre_eye_status != eye_status) eye.ready_for_blink_eye();
-    eye.blink_eye(look_x, look_y, blink_level);
-    blink_level += 1;
-    if (blink_level == max_blink_level){
-      blink_level = 0;
-    }
-  }
-
-  else if (eye_status == eye_display::EyeStatus::EYE_STATUS_SURPRISED) { // 2
-    // 驚き
-    if (pre_eye_status != eye_status) eye.ready_for_surprised_eye();
-    eye.surprised(look_x, look_y, surprised_level);
-    surprised_level += 1;
-    if (surprised_level == max_surprised_level){
-      surprised_level = 0;
-    }
-  }
-
-  else if (eye_status == eye_display::EyeStatus::EYE_STATUS_SLEEPY) { // 3
-    // 眠い
-    if (pre_eye_status != eye_status) eye.ready_for_sleepy_eye();
-    eye.sleepy(look_x, look_y, sleepy_level);
-    sleepy_level += 1;
-    if (sleepy_level == max_sleepy_level){
-      sleepy_level = 0;
-    }
-  }
-
-  else if (eye_status == eye_display::EyeStatus::EYE_STATUS_ANGRY){ // 4
-    // 怒り
-    if (pre_eye_status != eye_status) eye.ready_for_angry_eye();
-    eye.angry(look_x, look_y, angry_level);
-    angry_level += 1;
-    if (angry_level == max_angry_level){
-      angry_level = 0;
-    }
-  }
-
-  else if (eye_status == eye_display::EyeStatus::EYE_STATUS_SAD) { // 5
-    // 悲しむ・困る
-    if (pre_eye_status != eye_status) eye.ready_for_sad_eye();
-    eye.sad(look_x, look_y, sad_level);
-    sad_level += 1;
-    if (sad_level == max_sad_level){
-      sad_level = 0;
-    }
-  }
-
-  else if (eye_status == eye_display::EyeStatus::EYE_STATUS_HAPPY) { // 6
-    // 喜ぶ
-    if (pre_eye_status != eye_status) eye.ready_for_happy_eye();
-    eye.happy(look_x, look_y, happy_level);
-    happy_level += 1;
-    if (happy_level == max_happy_level){
-      happy_level = 0;
-    }
-  }
-  */
-
-  pre_eye_status = eye_status;
-
   nh.spinOnce();
+
   char log_msg[50];
-  sprintf(log_msg, "Eye status: %d", eye_status);
+  sprintf(log_msg, "Eye status: %d", emotion.get_emotion());
   nh.loginfo(log_msg);
 }
 
