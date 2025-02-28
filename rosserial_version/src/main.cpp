@@ -153,44 +153,6 @@ void setup()
   sprintf(log_msg, "Read rosparam : direction is %d", direction);
   nh.loginfo(log_msg);
 
-  //// plan 1
-#if 0
-  char eye_asset_map_str[512];
-  char *eye_asset_map_str_ptr[1] = {eye_asset_map_str};
-  nh.getParam("~eye_asset_map", eye_asset_map_str_ptr);
-  sprintf(log_msg, "Read rosparam : eye_asset_map is %s", eye_asset_map_str);
-  nh.loginfo(log_msg);
-
-  //DynamicJsonDocument eye_asset_map_doc(2048);
-  StaticJsonDocument<2049> eye_asset_map_doc;
-  deserializeJson(eye_asset_map_doc, eye_asset_map_str);
-
-  for(auto & eye_asset: eye_asset_map) {
-    JsonArray arr = eye_asset_map_doc[eye_asset.first.c_str()].as<JsonArray>();
-    if ( arr.size() > 0 ) {
-      EyeAsset *asset = &(eye_asset.second);
-      asset->upperlid_position.resize(0);
-      for (JsonVariant value : arr) {
-	asset->upperlid_position.push_back(value.as<float>());
-      }
-    } else {
-      char log_msg[128];
-      sprintf(log_msg, "eye_asset_map does not have '%s' data", eye_asset.first.c_str());
-      nh.logwarn(log_msg);
-    }
-  }
-#endif
-  // display map data
-  for(auto const& eye_asset: eye_asset_map) {
-    char log_msg[256];
-    sprintf(log_msg, "%10s :", eye_asset.first.c_str());
-    for (float pos_y : eye_asset.second.upperlid_position) {
-      sprintf(log_msg, "%s %6.1f", log_msg, pos_y);
-    }
-    nh.loginfo(log_msg);
-  }
-
-  //// plan 2
   for(auto & eye_asset: eye_asset_map) {
     ((EyeAsset *)&(eye_asset.second))->upperlid_position.resize(0); // for debug
     char eye_asset_map_str[512];
