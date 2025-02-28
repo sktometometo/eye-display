@@ -15,7 +15,7 @@
             baud: $(arg baud)
             mode_right: $(arg mode_right)
             direction: $(arg direction)
-            eye_asset_map: '{normal: [-130], blink: [-130, -130, 0, 0, -130, -130], surprised: [-130, -130, -130, -130, 0, 0, -130, -130, -130, -130, 0, -130, -130, 0, -130, -130], sleepy: [-70, -70, -60, 0, 0, 0, -60, -70, -70, -70], angry: [-10.0], sad: [0.0], happy: [0.0]}'
+            eye_asset_names: [normal, blink, surprised, sleepy, angry, sad, happy]
             normal_eye_asset: '{upperlid_position: [-130]}'
             blink_eye_asset: '{upperlid_position: [-130, -130, 0, 0, -130, -130]}'
             surprised_eye_asset: '{path_iris: "/normal_kxr_iris_surprised.jpg", path_pupil: "/normal_kxr_puil_surprised.png", path_reflex: "/normal_kxr_reflex_surp.png", upperlid_position: [-130, -130, -130, -130, 0, 0, -130, -130, -130, -130, 0, -130, -130, 0, -130, -130]}'

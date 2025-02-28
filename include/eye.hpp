@@ -180,21 +180,31 @@ public:
     //return sprite.drawJpgFile(SPIFFS, filePath);
     std::string pathStr(filePath);
     std::string extension = pathStr.substr(pathStr.find_last_of('.') + 1);
+    bool ret = false;
 
     if (extension == "jpg" || extension == "jpeg") {
       char log_msg[50];
       sprintf(log_msg, "loading jpeg: %s", filePath);
       print_log(log_msg);
 
-      return sprite.drawJpgFile(SPIFFS, filePath);
+      ret = sprite.drawJpgFile(SPIFFS, filePath);
     } else if (extension == "png") {
       char log_msg[50];
       sprintf(log_msg, "loading png: %s", filePath);
       print_log(log_msg);
 
-      return sprite.drawPngFile(SPIFFS, filePath);
+      ret = sprite.drawPngFile(SPIFFS, filePath);
+    } else {
+      char log_msg[50];
+      sprintf(log_msg, "invalid image extension %s", filePath);
+      print_log(log_msg);
     }
-    return false;
+    if (not ret) {
+      char log_msg[50];
+      sprintf(log_msg, "Failed to load %s", filePath);
+      print_log(log_msg);
+    }
+    return ret;
   }
 
    // 視線方向を変更（値を設定するだけ）

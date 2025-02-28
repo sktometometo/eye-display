@@ -111,7 +111,12 @@ public:
     void update_emotion() {
       //float upperlid_y = upperlid_position_map[eye_status][frame % upperlid_position_map[eye_status].size()];
       EyeAsset* asset = &(eye_asset_map[eye_status_str.c_str()]);
-      float upperlid_y = asset->upperlid_position[frame % asset->upperlid_position.size()];
+      float upperlid_y;
+      if (asset->upperlid_position.size() > 0) {
+        upperlid_y = asset->upperlid_position[frame % asset->upperlid_position.size()];
+      }else{
+        upperlid_y = 0;
+      }
       eyeManager.update_look(0, 0, 0, upperlid_y);  // dx, dy, dx_upperlid, dy_upperlid, dtheta_upperlid
       frame ++;
     }

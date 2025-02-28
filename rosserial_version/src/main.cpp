@@ -21,6 +21,71 @@
 #include "std_msgs/UInt16.h"
 #include "eye_display/EyeStatus.h"
 
+#include <numeric> // accumulate
+
+namespace ros
+{
+template<class Hardware,
+         int MAX_SUBSCRIBERS = 25,
+         int MAX_PUBLISHERS = 25,
+         int INPUT_SIZE = 512,
+         int OUTPUT_SIZE = 512>
+class NodeHandleEx : public NodeHandle_<Hardware, MAX_SUBSCRIBERS, MAX_PUBLISHERS, INPUT_SIZE, OUTPUT_SIZE>
+{
+  typedef NodeHandle_<Hardware, MAX_SUBSCRIBERS, MAX_PUBLISHERS, INPUT_SIZE, OUTPUT_SIZE> super;
+public:
+  bool getParam(const char* name, int* param, int length = 1, int timeout = 1000) {
+    return super::getParam(name, param, length, timeout);
+  }
+  bool getParam(const char* name, float* param, int length = 1, int timeout = 1000) {
+    return super::getParam(name, param, length, timeout);
+  }
+  bool getParam(const char* name, char** param, int length = 1, int timeout = 1000) {
+    return super::getParam(name, param, length, timeout);
+  }
+  bool getParam(const char* name, bool* param, int length = 1, int timeout = 1000) {
+    return super::getParam(name, param, length, timeout);
+  }
+  bool getParam(const char* name, std::vector<std::string> &param, int timeout = 1000) {
+    if (!super::requestParam(name, timeout)) return false;
+    param.resize(super::req_param_resp.strings_length);
+    //copy it over
+    for (int i = 0; i < super::req_param_resp.strings_length; i++)
+      param[i] = std::string(super::req_param_resp.strings[i]);
+    return true;
+  }
+  bool getParam(const char* name, std::string &param, int timeout = 1000) {
+    if (!super::requestParam(name, timeout)) return false;
+    if (super::req_param_resp.strings_length == 1) {
+      param = std::string(super::req_param_resp.strings[0]);
+      return true;
+    } else {
+      logwarn("Failed to get param: length mismatch");
+      return false;
+    }
+  }
+
+#define def_log_formatter(funcname)                             \
+  void funcname(const char *format, ...) {                      \
+    char *string;                                               \
+    va_list args;                                               \
+    va_start(args, format);                                     \
+    if (0 > vasprintf(&string, format, args)) string == NULL;   \
+    va_end(args);                                               \
+    if(string) {                                                \
+      super::logwarn(string);                                   \
+      free(string);                                             \
+    }                                                           \
+  }
+  def_log_formatter(logebug)
+  def_log_formatter(loginfo)
+  def_log_formatter(logwarn)
+  def_log_formatter(logerror)
+  def_log_formatter(logfatal)
+};
+}
+///
+
 #define TFT_BL 10
 
 constexpr int SDA_PIN = 8;
@@ -66,7 +131,7 @@ void callback_emotion(const std_msgs::UInt16 &msg);
 
 void receiveEvent(int howMany);
 
-ros::NodeHandle_<ArduinoHardware> nh;
+ros::NodeHandleEx<ArduinoHardware> nh;
 ros::Subscriber<geometry_msgs::Point> sub_point("~look_at", &callback_look_at);
 ros::Subscriber<std_msgs::UInt16> sub_eye_status("eye_status", &callback_emotion);
 
@@ -191,21 +256,23 @@ void setup()
   }
 
   //// plan 2
+  // get eye_asset_names from rosParam
+  std::vector<std::string> eye_asset_names;
+  nh.getParam("~eye_asset_names", eye_asset_names);
+  // initialize eye_asset_map from eye_asset_names
+  for(auto name: eye_asset_names) {
+    eye_asset_map[name] = EyeAsset();
+    nh.logwarn("get data %s", name.c_str());
+  }
   for(auto & eye_asset: eye_asset_map) {
-    ((EyeAsset *)&(eye_asset.second))->upperlid_position.resize(0); // for debug
-    char eye_asset_map_str[512];
-    char *eye_asset_map_str_ptr[1] = {eye_asset_map_str};
-
+    // ((EyeAsset *)&(eye_asset.second))->upperlid_position.resize(0); // for debug
     char eye_asset_map_key[128];
     sprintf(eye_asset_map_key, "~%s_eye_asset", eye_asset.first.c_str());
-
-    nh.getParam(eye_asset_map_key, eye_asset_map_str_ptr);
-    sprintf(log_msg, "Read rosparam : %s is %s", eye_asset_map_key, eye_asset_map_str);
-    nh.loginfo(log_msg);
-
-    //DynamicJsonDocument eye_asset_map_doc(2048);
+    std::string eye_asset_map_params;
+    nh.getParam(eye_asset_map_key, eye_asset_map_params);
+    nh.loginfo("Read rosparam : %s is %s", eye_asset_map_key, eye_asset_map_params.c_str());
     StaticJsonDocument<2049> eye_asset_map_doc;
-    deserializeJson(eye_asset_map_doc, eye_asset_map_str);
+    deserializeJson(eye_asset_map_doc, eye_asset_map_params.c_str());
 
     EyeAsset *asset = &(eye_asset.second);
     if ( eye_asset_map_doc["path_upperlid"] ) { String s = eye_asset_map_doc["path_upperlid"].as<String>(); asset->path_upperlid = (char *)malloc(s.length()+1); s.toCharArray((char *)(asset->path_upperlid), s.length()+1); }
@@ -221,9 +288,7 @@ void setup()
 	asset->upperlid_position.push_back(value.as<float>());
       }
     } else {
-      char log_msg[128];
-      sprintf(log_msg, "eye_asset_map does not have '%s' data", eye_asset.first.c_str());
-      nh.logwarn(log_msg);
+      nh.logwarn("eye_asset_map does not have '%s' data", eye_asset.first.c_str());
     }
   }
 
@@ -264,9 +329,7 @@ void loop()
 
   nh.spinOnce();
 
-  char log_msg[50];
-  sprintf(log_msg, "Eye status: %d", emotion.get_emotion());
-  nh.loginfo(log_msg);
+  nh.loginfo("Eye status: %d", emotion.get_emotion());
 }
 
 void print_log(const char* str){
