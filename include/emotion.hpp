@@ -74,14 +74,26 @@ public:
       case eye_display::EyeStatus::EYE_STATUS_HEART:
         eye_status_str = "heart";
 	break;
-      case eye_display::EyeStatus::EYE_STATUS_SHINE:
-        eye_status_str = "shine";
+      case eye_display::EyeStatus::EYE_STATUS_SHINE1:
+        eye_status_str = "shine1";
+	break;
+      case eye_display::EyeStatus::EYE_STATUS_SHINE2:
+        eye_status_str = "shine2";
 	break;
       case eye_display::EyeStatus::EYE_STATUS_FLUSTRATED:
         eye_status_str = "flustrated";
 	break;
       case eye_display::EyeStatus::EYE_STATUS_BORING:
         eye_status_str = "boring";
+        break;
+      case eye_display::EyeStatus::EYE_STATUS_SERIOUS:
+        eye_status_str = "serious";
+	break;
+      case eye_display::EyeStatus::EYE_STATUS_REGRET1:
+        eye_status_str = "regret1";
+	break;
+      case eye_display::EyeStatus::EYE_STATUS_REGRET2:
+        eye_status_str = "regret2";
         break;
 
       default:
