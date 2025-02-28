@@ -30,13 +30,14 @@ struct EyeAsset {
   const char* path_pupil = "/pupil.jpg";        //  move along with iris
   const char* path_reflex = "/reflex.jpg" ;     //  move along with puppil + random motion
   const char* path_upperlid = "/upperlid.jpg";  // use upperlid_position_map to set y-axis motoin
-  std::vector<float> upperlid_position = {}; // upperlid = motion layer
+  std::vector<float> upperlid_position = {0}; // upperlid = motion layer
 };
-std::map<std::string, EyeAsset> eye_asset_map = {{"normal", EyeAsset()},
-						 {"blink", EyeAsset()},
-						 {"surprised", EyeAsset()},
-						 {"sleepy", EyeAsset()},
-						 {"angry", EyeAsset()},
-						 {"sad", EyeAsset()},
-						 {"happy", EyeAsset()}};
+// std::map<std::string, EyeAsset> eye_asset_map = {{"normal", EyeAsset()},
+// 						 {"blink", EyeAsset()},
+// 						 {"surprised", EyeAsset()},
+// 						 {"sleepy", EyeAsset()},
+// 						 {"angry", EyeAsset()},
+// 						 {"sad", EyeAsset()},
+// 						 {"happy", EyeAsset()}};
+std::map<std::string, EyeAsset> eye_asset_map = {};
 

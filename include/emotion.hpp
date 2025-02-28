@@ -62,6 +62,16 @@ public:
       case eye_display::EyeStatus::EYE_STATUS_HAPPY:
         eye_status_str = "happy";
 	break;
+      case eye_display::EyeStatus::EYE_STATUS_TROUBLED:
+        eye_status_str = "troubled";
+	break;
+      case eye_display::EyeStatus::EYE_STATUS_DELIGHTED:
+        eye_status_str = "delighted";
+	break;
+      case eye_display::EyeStatus::EYE_STATUS_EXPECTING:
+        eye_status_str = "expecting";
+        break;
+
       default:
 	return -1;
       }
@@ -82,7 +92,12 @@ public:
 
     void update_emotion() {
       EyeAsset* asset = &(eye_asset_map[eye_status_str.c_str()]);
-      float upperlid_y = asset->upperlid_position[frame % asset->upperlid_position.size()];
+      float upperlid_y;
+      if (asset->upperlid_position.size() > 0) {
+        upperlid_y = asset->upperlid_position[frame % asset->upperlid_position.size()];
+      }else{
+        upperlid_y = 0;
+      }
       eyeManager.update_look(0, 0, 0, upperlid_y);  // dx, dy, dx_upperlid, dy_upperlid, dtheta_upperlid
       frame ++;
     }
