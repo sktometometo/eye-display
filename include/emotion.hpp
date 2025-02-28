@@ -71,6 +71,18 @@ public:
       case eye_display::EyeStatus::EYE_STATUS_EXPECTING:
         eye_status_str = "expecting";
         break;
+      case eye_display::EyeStatus::EYE_STATUS_HEART:
+        eye_status_str = "heart";
+	break;
+      case eye_display::EyeStatus::EYE_STATUS_SHINE:
+        eye_status_str = "shine";
+	break;
+      case eye_display::EyeStatus::EYE_STATUS_FLUSTRATED:
+        eye_status_str = "flustrated";
+	break;
+      case eye_display::EyeStatus::EYE_STATUS_BORING:
+        eye_status_str = "boring";
+        break;
 
       default:
 	return -1;
