@@ -177,7 +177,6 @@ public:
 
   bool draw_image_file(LGFX_Sprite& sprite, const char* filePath)
   {
-    //return sprite.drawJpgFile(SPIFFS, filePath);
     std::string pathStr(filePath);
     std::string extension = pathStr.substr(pathStr.find_last_of('.') + 1);
 
@@ -261,12 +260,6 @@ public:
   {
     this->load_eye_images(NULL, NULL, NULL, NULL, NULL);
     return ;
-    // this->load_eye_images("/outline.jpg",
-    //                       "/iris.jpg",
-    //                       "/pupil.jpg",
-    //                       "/reflex.jpg",
-    //                       "/upperlid.jpg");
-    // return ;
     this->load_eye_images(
             this->path_jpg_outline.c_str(),
             path_jpg_iris == NULL ? this->path_jpg_iris.c_str() : path_jpg_iris,
