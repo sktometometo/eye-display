@@ -94,7 +94,7 @@ public:
           const int upperlid_pivot_x = 75,
           const int upperlid_pivot_y = 139,
           const int upperlid_default_pos_x = 75,
-          const int upperlid_default_pos_y = 19,
+          const int upperlid_default_pos_y = 7,
           const int upperlid_sad_pos_x = 100,
           const int upperlid_sad_pos_y = 40,
           const int upperlid_sad_theta = 30,
