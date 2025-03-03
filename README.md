@@ -143,8 +143,24 @@ Then you can control the device with I2C.
 
 ### Description of direction
 
-![eye_display_direction](./doc/eye_display_direction.svg)]
+![eye_display_direction](./doc/eye_display_direction.svg)
 
 ### How to update image
 
-![eye_layer_structure](./doc/eye_structure.svg)]
+![eye_layer_structure](./doc/eye_structure.svg)
+
+## For Developers
+
+### How to update msg
+
+Message headers in [`lib/ros_lib`](./lib/ros_lib/) directory are automatically generated with `make_libraries.py` script in `rosserial_arduino` package.
+
+And this repo provide easy way to update `ros_lib` as [update_ros_lib.sh](./scripts/update_ros_lib.sh).
+
+So if you want to update message definition in [`msg`](./msg/) directory, please run the following command.
+
+```bash
+catkin build eye_display
+source <path/to/catkin_ws>/devel/setup.bash
+rosrun eye_display update_ros_lib.sh
+```
