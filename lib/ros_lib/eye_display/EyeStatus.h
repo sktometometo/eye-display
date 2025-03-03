@@ -48,7 +48,7 @@ namespace eye_display
     }
 
     virtual const char * getType() override { return "eye_display/EyeStatus"; };
-    virtual const char * getMD5() override { return "78f98b2a6b27818c86e9e651a10b9bef"; };
+    virtual const char * getMD5() override { return "42ee7f69b45515c113da121d157a4f78"; };
 
   };
 
