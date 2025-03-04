@@ -17,7 +17,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Cache apt
-      uses: actions/cache@v2
+      uses: actions/cache@v4
       with:
         path: /var/cache/apt/archives
         key: ${{ runner.os }}-apt-${{ hashFiles('${github.workspace}/package.xml') }}
