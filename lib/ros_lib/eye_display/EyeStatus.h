@@ -23,9 +23,13 @@ namespace eye_display
       enum { EYE_STATUS_DELIGHTED = 8 };
       enum { EYE_STATUS_EXPECTING = 9 };
       enum { EYE_STATUS_HEART = 10 };
-      enum { EYE_STATUS_SHINE = 11 };
-      enum { EYE_STATUS_FLUSTRATED = 12 };
-      enum { EYE_STATUS_BORING = 13 };
+      enum { EYE_STATUS_SHINE1 = 11 };
+      enum { EYE_STATUS_SHINE2 = 12 };
+      enum { EYE_STATUS_FLUSTRATED = 13 };
+      enum { EYE_STATUS_BORING = 14 };
+      enum { EYE_STATUS_SERIOUS = 15 };
+      enum { EYE_STATUS_REGRET1 = 16 };
+      enum { EYE_STATUS_REGRET2 = 17 };
 
     EyeStatus()
     {
@@ -44,7 +48,7 @@ namespace eye_display
     }
 
     virtual const char * getType() override { return "eye_display/EyeStatus"; };
-    virtual const char * getMD5() override { return "78f98b2a6b27818c86e9e651a10b9bef"; };
+    virtual const char * getMD5() override { return "42ee7f69b45515c113da121d157a4f78"; };
 
   };
 

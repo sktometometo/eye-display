@@ -4,6 +4,7 @@ project(eye_display)
 find_package(catkin REQUIRED COMPONENTS
     message_generation
 )
+#catkin_python_setup()
 
 ## To declare and build messages, services or actions from within this
 ## package, follow these steps:
@@ -37,3 +38,7 @@ CATKIN_DEPENDS message_runtime
 )
 
 include_directories()
+
+catkin_install_python(PROGRAMS
+  node_scripts/build.py node_scripts/demo_move_eye.py node_scripts/pub_eye_status.py
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/node_scripts)

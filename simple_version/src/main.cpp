@@ -8,6 +8,25 @@
 const int image_width = 139;
 const int image_height = 139;
 
+<<<<<<< HEAD
+const char path_image_eyeball[] = "/eyeball.jpg";
+
+const char path_image_iris_right[] = "/iris_right.jpg";
+const char path_image_surprised_iris_right[] = "/iris_surprised_right.jpg";
+const char path_image_upperlid_right[] = "/upperlid.jpg";
+const char path_image_angry_upperlid_right[] = "/upperlid_leftside_down.jpg";
+const char path_image_sad_upperlid_right[] = "/upperlid_rightside_down.jpg";
+const char path_image_happy_upperlid_right[] = "/upperlid_happy_right.jpg";
+
+// eye_status ... 0: 通常, 1: 瞬き, 2: 驚き, 3: 眠い, 4: 怒る, 5: 悲しむ・困る, 6: 嬉しい...
+int eye_status = 0;
+int blink_level = 0; int max_blink_level = 6;
+int surprised_level = 0; int max_surprised_level = 16;
+int sleepy_level = 0; int max_sleepy_level = 10;
+int angry_level = 0; int max_angry_level = 20;
+int sad_level = 0; int max_sad_level = 20;
+int happy_level = 0; int max_happy_level = 20;
+=======
 const char path_image_outline[] = "/outline.jpg";
 const char path_image_iris[] = "/iris.jpg";
 const char path_image_pupil[] = "/pupil.jpg";
@@ -19,6 +38,7 @@ const char path_image_pupil_surprised[] = "/pupil_surprised.jpg";
 const char path_image_reflex_surprised[] = "/reflex_surprised.jpg";
 
 const char path_image_reflex_happy[] = "/reflex_happy.jpg";
+>>>>>>> shinjo/master
 
 static Eye eye;
 
@@ -32,11 +52,24 @@ void setup()
 
   delay(5000);
 
+<<<<<<< HEAD
+  String mode = "right";
+  if (mode == "right")
+  {
+    eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 1);
+  }
+  else
+  {
+    eye.init(path_image_eyeball, path_image_iris_right,  path_image_upperlid_right, image_width, image_height, 5);
+  }
+
+=======
   eye.init(path_image_outline, path_image_iris, path_image_pupil,
           path_image_reflex, path_image_upperlid,
           path_image_iris_surprised, path_image_pupil_surprised, path_image_reflex_surprised,
           path_image_reflex_happy,
           image_width, image_height, 1);
+>>>>>>> shinjo/master
   eye.update_look();
 
   Serial.println("Start.");
@@ -56,6 +89,25 @@ void loop()
       look_y = 10.0 * cos(i * 0.1) ;
       eye.update_look(look_x, look_y);
   }
+<<<<<<< HEAD
+
+  float look_x = 0.3 * sin(i * 0.1);
+  float look_y = 0.3 * cos(i * 0.1) ;
+
+  if (eye_status == 0) {
+    // 通常
+    eye.update_look(look_x, look_y);
+  } 
+
+  else if (eye_status == 1){
+    // 瞬き
+    eye.blink_eye(look_x, look_y, blink_level);
+    blink_level += 1;
+    if (blink_level == max_blink_level){
+      blink_level = 0;
+      // eye_status = 0;
+    }
+=======
   look_x = 0;
   look_y = 0;
   eye.update_look(look_x, look_y);
@@ -69,6 +121,7 @@ void loop()
       delay(20);
       blink_level = i % Eye::max_blink_level;
       eye.blink_eye(look_x, look_y, blink_level);
+>>>>>>> shinjo/master
   }
   delay(1000);
 

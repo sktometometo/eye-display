@@ -1,0 +1,35 @@
+<launch>
+    <arg name="port" />
+    <arg name="baud" default="57600" />
+    <arg name="mode_right" default="true" />
+    <arg name="direction" default="1" />
+
+    <node
+        pkg="rosserial_python"
+        type="serial_node.py"
+        name="eye_display"
+        output="screen">
+        
+        <rosparam subst_value="true">
+            port: $(arg port)
+            baud: $(arg baud)
+            mode_right: $(arg mode_right)
+            direction: $(arg direction)
+            eye_asset_names: [normal, blink, sleepy, sad, troubled, delighted, heart, shine1, shine2, boring, regret1, regret2, serious]
+
+            normal_eye_asset: '{path_iris: "/krmt_iris_normal.png", path_pupil: "/white.jpg", path_reflex: "/krmt_reflex_normal.png", path_upperlid: "/krmt_upperlid_normal.png", upperlid_position: [9]}'
+            blink_eye_asset: '{path_iris: "/krmt_iris_normal.png", path_pupil: "/white.jpg", path_reflex: "/krmt_reflex_normal.png", path_upperlid: "/krmt_upperlid_normal.png", upperlid_position: [9, 9, 130, 130, 9, 9]}'
+            sleepy_eye_asset: '{path_iris: "/krmt_iris_normal.png", path_pupil: "/white.jpg", path_reflex: "/krmt_reflex_normal.png", path_upperlid: "/krmt_upperlid_normal.png", upperlid_position: [60, 60, 70, 130, 130, 130, 70, 60, 60, 60]}'
+            sad_eye_asset: '{path_iris: "/krmt_iris_normal.png", path_pupil: "/white.jpg", path_reflex: "/krmt_reflex_normal.png", path_upperlid: "/krmt_upperlid_sad.png", upperlid_position: [130]}'
+            troubled_eye_asset: '{path_iris: "/krmt_iris_normal.png", path_pupil: "/white.jpg", path_reflex: "/krmt_reflex_troubled.png", path_upperlid: "/white.jpg", upperlid_position: [9, 9, 130, 130, 9, 9]}'
+            delighted_eye_asset: '{path_iris: "/krmt_upperlid_normal.png", path_pupil: "/white.jpg", path_reflex: "/krmt_reflex_delighted.png", path_upperlid: "/white.jpg", upperlid_position: [130]}'
+            heart_eye_asset: '{path_iris: "/krmt_iris_normal.png", path_pupil: "/white.jpg", path_reflex: "/krmt_reflex_heart.png", path_upperlid: "/krmt_upperlid_normal.png", upperlid_position: [9, 9, 130, 130, 9, 9]}'
+            shine1_eye_asset: '{path_iris: "/krmt_iris_normal.png", path_pupil: "/white.jpg", path_reflex: "/krmt_reflex_shine1.png", path_upperlid: "/krmt_upperlid_normal.png", upperlid_position: [9, 9, 130, 130, 9, 9]}'
+            shine2_eye_asset: '{path_iris: "/krmt_iris_normal.png", path_pupil: "/white.jpg", path_reflex: "/krmt_reflex_shine2.png", path_upperlid: "/krmt_upperlid_normal.png", upperlid_position: [9, 9, 130, 130, 9, 9]}'
+            boring_eye_asset: '{path_iris: "/krmt_upperlid_normal.png", path_pupil: "/white.jpg", path_reflex: "/krmt_reflex_boring.png", path_upperlid: "/white.jpg", upperlid_position: [130]}'
+            regret1_eye_asset: '{path_iris: "/krmt_upperlid_normal.png", path_pupil: "/white.jpg", path_reflex: "/krmt_reflex_regret1.png", path_upperlid: "/white.jpg", upperlid_position: [130]}'
+            regret2_eye_asset: '{path_iris: "/krmt_upperlid_normal.png", path_pupil: "/white.jpg", path_reflex: "/krmt_reflex_regret2.png", path_upperlid: "/white.jpg", upperlid_position: [130]}'
+            serious_eye_asset: '{path_iris: "/krmt_iris_normal.png", path_pupil: "/white.jpg", path_reflex: "/krmt_reflex_normal.png", path_upperlid: "/krmt_upperlid_serious.png", upperlid_position: [130]}'
+        </rosparam>
+    </node>
+</launch>

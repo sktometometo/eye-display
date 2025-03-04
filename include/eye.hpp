@@ -1,8 +1,16 @@
 #include <math.h>
 #include <functional>
+#include <vector>
+#include <map>
+#include <array>
+#include <string>
+#include <iostream>
 
 #include <Arduino.h>
+#include <ArduinoJson.h>
 #include <SPIFFS.h>
+
+#include "eye_assets.hpp"
 
 #if defined(STAMPS3)
 #include <lgfx_round_lcd_stamp_s3.hpp>
@@ -10,7 +18,10 @@
 #include <lgfx_round_lcd_stamp_c3.hpp>
 #endif
 
-class Eye
+extern void print_log(const char *);
+
+
+class EyeManager
 {
 private:
   LGFX_ROUND_LCD lcd;
@@ -24,9 +35,12 @@ private:
   LGFX_Sprite sprite_upperlid;
 
   float zoom_ratio;
-
   int image_width;
   int image_height;
+
+  float look_x = 0.0f;
+  float look_y = 0.0f;
+  float upperlid_y = 0.0f;
 
   int rotation;
   bool invert_rl;
@@ -80,7 +94,7 @@ public:
           const int upperlid_pivot_x = 75,
           const int upperlid_pivot_y = 139,
           const int upperlid_default_pos_x = 75,
-          const int upperlid_default_pos_y = 19,
+          const int upperlid_default_pos_y = 7,
           const int upperlid_sad_pos_x = 100,
           const int upperlid_sad_pos_y = 40,
           const int upperlid_sad_theta = 30,
@@ -161,6 +175,51 @@ public:
     }
   }
 
+  bool draw_image_file(LGFX_Sprite& sprite, const char* filePath)
+  {
+    std::string pathStr(filePath);
+    std::string extension = pathStr.substr(pathStr.find_last_of('.') + 1);
+    bool ret = false;
+
+    if (extension == "jpg" || extension == "jpeg") {
+      char log_msg[50];
+      sprintf(log_msg, "loading jpeg: %s", filePath);
+      print_log(log_msg);
+
+      ret = sprite.drawJpgFile(SPIFFS, filePath);
+    } else if (extension == "png") {
+      char log_msg[50];
+      sprintf(log_msg, "loading png: %s", filePath);
+      print_log(log_msg);
+
+      ret = sprite.drawPngFile(SPIFFS, filePath);
+    } else {
+      char log_msg[50];
+      sprintf(log_msg, "invalid image extension %s", filePath);
+      print_log(log_msg);
+    }
+    if (not ret) {
+      char log_msg[50];
+      sprintf(log_msg, "Failed to load %s", filePath);
+      print_log(log_msg);
+    }
+    return ret;
+  }
+
+   // 視線方向を変更（値を設定するだけ）
+  void set_gaze_direction(float look_x, float look_y)
+  {
+    this->look_x = look_x;
+    this->look_y = look_y;
+  }
+
+  // まぶたの位置を変更（値を設定するだけ）
+  void set_upperlid_position(float upperlid_y)
+  {
+    this->upperlid_y = upperlid_y;
+  }
+
+  // 目の状態を更新する
   void load_eye_images(
           const char *path_jpg_outline,
           const char *path_jpg_iris,
@@ -171,14 +230,14 @@ public:
   {
     if (path_jpg_outline != NULL) {
         sprite_outline.fillScreen(TFT_WHITE);
-        if (not sprite_outline.drawJpgFile(SPIFFS, path_jpg_outline)) {
+        if (not draw_image_file(sprite_outline, path_jpg_outline)) {
             sprite_outline.fillScreen(TFT_WHITE);
         }
     }
 
     if (path_jpg_iris != NULL) {
         sprite_iris.fillScreen(TFT_WHITE);
-        if (not sprite_iris.drawJpgFile(SPIFFS, path_jpg_iris)) {
+        if (not draw_image_file(sprite_iris, path_jpg_iris)) {
             sprite_iris.fillScreen(TFT_WHITE);
         }
     }
@@ -186,108 +245,24 @@ public:
 
     if (path_jpg_pupil != NULL) {
         sprite_pupil.fillScreen(TFT_WHITE);
-        if (not sprite_pupil.drawJpgFile(SPIFFS, path_jpg_pupil)) {
+        if (not draw_image_file(sprite_pupil, path_jpg_pupil)) {
             sprite_pupil.fillScreen(TFT_WHITE);
         }
     }
 
     if (path_jpg_reflex != NULL) {
         sprite_reflex.fillScreen(TFT_WHITE);
-        if (not sprite_reflex.drawJpgFile(SPIFFS, path_jpg_reflex)) {
+        if (not draw_image_file(sprite_reflex, path_jpg_reflex)) {
             sprite_reflex.fillScreen(TFT_WHITE);
         }
     }
 
     if (path_jpg_upperlid != NULL) {
         sprite_upperlid.fillScreen(TFT_WHITE);
-        if (not sprite_upperlid.drawJpgFile(SPIFFS, path_jpg_upperlid)) {
+        if (not draw_image_file(sprite_upperlid, path_jpg_upperlid)) {
             sprite_upperlid.fillScreen(TFT_WHITE);
         }
     }
-  }
-
-  // 通常の目を描画する準備
-  void ready_for_normal_eye(const char *path_jpg_iris = NULL, const char *path_jpg_upperlid = NULL)
-  {
-    this->load_eye_images(
-            this->path_jpg_outline.c_str(),
-            path_jpg_iris == NULL ? this->path_jpg_iris.c_str() : path_jpg_iris,
-            this->path_jpg_pupil.c_str(),
-            this->path_jpg_reflex.c_str(),
-            path_jpg_upperlid == NULL ? this->path_jpg_upperlid.c_str() : path_jpg_upperlid
-            );
-  }
-
-  //
-  void ready_for_blink_eye(const char *path_jpg_iris = NULL, const char *path_jpg_upperlid = NULL)
-  {
-    this->load_eye_images(
-            this->path_jpg_outline.c_str(),
-            path_jpg_iris == NULL ? this->path_jpg_iris.c_str() : path_jpg_iris,
-            this->path_jpg_pupil.c_str(),
-            this->path_jpg_reflex.c_str(),
-            path_jpg_upperlid == NULL ? this->path_jpg_upperlid.c_str() : path_jpg_upperlid
-            );
-  }
-
-  // 驚いた目を描画する準備
-  void ready_for_surprised_eye(const char *path_jpg_surprised_iris = NULL)
-  {
-    this->load_eye_images(
-            this->path_jpg_outline.c_str(),
-            path_jpg_surprised_iris == NULL ? this->path_jpg_iris_surprised.c_str() : path_jpg_surprised_iris,
-            this->path_jpg_pupil_surprised.c_str(),
-            this->path_jpg_reflex_surprised.c_str(),
-            this->path_jpg_upperlid.c_str()
-            );
-  }
-
-  //
-  void ready_for_sleepy_eye()
-  {
-    this->load_eye_images(
-            this->path_jpg_outline.c_str(),
-            this->path_jpg_iris.c_str(),
-            this->path_jpg_pupil.c_str(),
-            this->path_jpg_reflex.c_str(),
-            this->path_jpg_upperlid.c_str()
-            );
-  }
-
-  // 怒った目を描画する準備
-  void ready_for_angry_eye(const char *path_jpg_angry_upperlid = NULL)
-  {
-    this->load_eye_images(
-            this->path_jpg_outline.c_str(),
-            this->path_jpg_iris.c_str(),
-            this->path_jpg_pupil.c_str(),
-            this->path_jpg_reflex.c_str(),
-            this->path_jpg_upperlid.c_str()
-            );
-  }
-
-  // 悲しい目を描画する準備
-  void ready_for_sad_eye(const char *path_jpg_sad_upperlid = NULL)
-  {
-    this->load_eye_images(
-            this->path_jpg_outline.c_str(),
-            this->path_jpg_iris.c_str(),
-            this->path_jpg_pupil.c_str(),
-            this->path_jpg_reflex.c_str(),
-            this->path_jpg_upperlid.c_str()
-            );
-  }
-
-  // 喜んでいる目を描画する準備
-  void ready_for_happy_eye(const char *path_jpg_happy_reflex = NULL)
-  {
-    this->load_eye_images(
-            this->path_jpg_outline.c_str(),
-            "",
-            "",
-            path_jpg_happy_reflex == NULL ? this->path_jpg_reflex_happy.c_str() : path_jpg_happy_reflex,
-            ""
-            );
   }
 
   // 通常の目の描画
@@ -305,62 +280,11 @@ public:
     sprite_pupil.pushSprite(&sprite_eye, dx, dy, TFT_WHITE); // 瞳孔をランダムに動かす
     sprite_reflex.pushSprite(&sprite_eye, dx + rx, dy + ry, TFT_WHITE); // 光の反射をランダムに動かす
     sprite_upperlid.pushRotateZoom(&sprite_eye,
-            this->upperlid_default_pos_x + dx_upperlid, this->upperlid_default_pos_y + dy_upperlid,
+            this->upperlid_default_pos_x + dx_upperlid,
+            this->upperlid_default_pos_y + dy_upperlid,
             dtheta_upperlid, 1.0, 1.0, TFT_WHITE); 
 
     draw_updated_image();
-  }
-
-  // 瞬きの描画
-  void blink_eye(float dx = 0.0, float dy = 0.0, int blink_level = 0 /*何コマ目か*/, float random_scale = 5.0)
-  {
-    int upperlid_y_arr[] = {9, 9, 130, 130, 9, 9}; // 上瞼のコマ送り時のy座標の配列
-    this->update_look(dx, dy, 0.0,
-            upperlid_y_arr[blink_level] - this->upperlid_default_pos_y,
-            0.0, random_scale);
-  }
-
-
-  // 驚きの目の描画
-  void surprised(float dx = 0.0, float dy = 0.0, int surprised_level = 0 /*何コマ目か*/, float random_scale = 5.0)
-  {
-    int upperlid_y_arr[] = {9, 9, 9, 9, 130, 130, 9, 9, 9, 9, 130, 9, 9, 130, 9, 9};
-    this->update_look(dx, dy, 0.0,
-            upperlid_y_arr[surprised_level] - this->upperlid_default_pos_y,
-            0.0, random_scale);
-  }
-
-  // 眠い目の描画
-  void sleepy(float dx = 0.0, float dy = 0.0, int sleepy_level = 0, float random_scale = 5.0)
-  {
-    int upperlid_y_arr[] = {60, 60, 70, 130, 130, 130, 70, 60, 60, 60};
-    this->update_look(dx, dy, 0.0,
-            upperlid_y_arr[sleepy_level] - this->upperlid_default_pos_y,
-            0.0, random_scale);
-  }
-
-  // 怒った目の描画
-  void angry(float dx = 0.0, float dy = 0.0, int angry_level = 0, float random_scale = 5.0)
-  {
-    this->update_look(dx, dy,
-            this->upperlid_angry_pos_x - this->upperlid_default_pos_x,
-            this->upperlid_angry_pos_y - this->upperlid_default_pos_y,
-            this->upperlid_angry_theta, random_scale);
-  }
-
-  // 悲しい目の描画
-  void sad(float dx = 0.0, float dy = 0.0, int sad_level = 0, float random_scale = 5.0)
-  {
-    this->update_look(dx, dy,
-            this->upperlid_sad_pos_x - this->upperlid_default_pos_x,
-            this->upperlid_sad_pos_y - this->upperlid_default_pos_y,
-            this->upperlid_sad_theta, random_scale);
-  }
-
-  // 嬉しい目の描画
-  void happy(float dx = 0.0, float dy = 0.0, int happy_level = 0, float random_scale = 5.0)
-  {
-    this->update_look(dy, dy, 0, 0, 0, random_scale);
   }
 
   void draw_updated_image()
