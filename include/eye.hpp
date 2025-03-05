@@ -7,7 +7,6 @@
 #include <iostream>
 
 #include <Arduino.h>
-#include <ArduinoJson.h>
 #include <SPIFFS.h>
 
 #include "eye_assets.hpp"
