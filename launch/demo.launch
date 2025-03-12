@@ -3,6 +3,8 @@
     <arg name="baud" default="57600" />
     <arg name="mode_right" default="true" />
     <arg name="direction" default="1" />
+    <arg name="eye_asset_file" default="$(find eye_display)/launch/default.yaml" />
+    <arg name="debug" default="false"/>
 
     <node
         pkg="rosserial_python"
@@ -10,19 +12,19 @@
         name="eye_display"
         output="screen"
         >
-        <rosparam subst_value="true">
-            port: $(arg port)
-            baud: $(arg baud)
-            mode_right: $(arg mode_right)
-            direction: $(arg direction)
-            eye_asset_names: [normal, blink, surprised, sleepy, angry, sad, happy]
-            normal_eye_asset: '{upperlid_position: [9]}'
-            blink_eye_asset: '{upperlid_position: [9, 9, 130, 130, 9, 9]}'
-            surprised_eye_asset: '{path_iris: "/normal_kxr_iris_surprised.jpg", path_pupil: "/normal_kxr_puil_surprised.png", path_reflex: "/normal_kxr_reflex_surp.png", upperlid_position: [9, 9, 9, 9, 130, 130, 9, 9, 9, 9, 130, 9, 9, 130, 9, 9]}'
-            sleepy_eye_asset: '{path_iris: "/normal_kxr_iris_sleepy.png", path_pupil: "/normal_kxr_pupil_sleepy.png", upperlid_position: [60, 60, 70, 130, 130, 130, 70, 60, 60, 60]}'
-            angry_eye_asset: '{path_upperlid: "/normal_kxr_upperlid_ldown.jpg", upperlid_position: [120]}'
-            sad_eye_asset: '{path_upperlid: "/normal_kxr_upperlid_rdown.jpg", upperlid_position: [130]}'
-            happy_eye_asset: '{path_iris: "white.jpg", path_pupil: "white.jpg", path_reflex: "white.jpg", path_upperlid: "/normal_kxr_upperlid_happy.jpg", upperlid_position: [130]}'
-        </rosparam>
+        <param name="port" value="$(arg port)" />
+        <param name="baud" value="$(arg baud)" />
+        <param name="mode_right" value="$(arg mode_right)" />
+        <param name="direction" value="$(arg direction)" />
+        <rosparam command="load" ns="eye_asset" file="$(arg eye_asset_file)" />
     </node>
+
+    <group if="$(arg debug)">
+      <node
+          pkg="rosservice"
+          type="rosservice"
+          name="set_debug_mode"
+          args="call --wait /eye_display/set_logger_level rosout DEBUG"
+          />
+    </group>
 </launch>

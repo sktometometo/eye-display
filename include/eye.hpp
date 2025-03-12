@@ -9,7 +9,22 @@
 #include <Arduino.h>
 #include <SPIFFS.h>
 
-#include "eye_assets.hpp"
+struct EyeAsset {
+ std::string name = "default";
+ std::string path_outline = "/outline.jpg";    // static
+ std::string path_iris = "/iris.jpg";          // set_gaze_direction(x,y) to set position
+ std::string path_pupil = "/pupil.jpg";        //  move along with iris
+ std::string path_reflex = "/reflex.jpg" ;     //  move along with puppil + random motion
+ std::string path_upperlid = "/upperlid.jpg";  // use upperlid_position_map to set y-axis motoin
+ std::vector<float> upperlid_position = {0};   // upperlid = motion layer
+ int direction = 0;
+ bool invert_rl = false;
+ int upperlid_pivot_x = 75;
+ int upperlid_pivot_y = 139;
+ int upperlid_default_pos_x = 75;
+ int upperlid_default_pos_y = 7;
+ float upperlid_default_theta = 0;
+};
 
 #if defined(STAMPS3)
 #include <lgfx_round_lcd_stamp_s3.hpp>
@@ -17,8 +32,18 @@
 #include <lgfx_round_lcd_stamp_c3.hpp>
 #endif
 
-extern void print_log(const char *);
+#if defined(STAMPS3)
+#include "ArduinoHWCDCHardware.h"
+#elif defined(STAMPC3)
+#include "ArduinoHardware.h"
+#endif
 
+#if defined(USE_ROS)
+
+#include "node_handle_ex.h"  // #include "ros/node_handle.h"
+extern ros::NodeHandleEx<ArduinoHardware> nh;
+
+#endif
 
 class EyeManager
 {
@@ -39,97 +64,22 @@ private:
 
   float look_x = 0.0f;
   float look_y = 0.0f;
-  float upperlid_y = 0.0f;
 
-  int rotation;
-  bool invert_rl;
-
-  String path_jpg_outline;
-  String path_jpg_iris;
-  String path_jpg_pupil;
-  String path_jpg_reflex;
-  String path_jpg_upperlid;
-  String path_jpg_iris_surprised;
-  String path_jpg_pupil_surprised;
-  String path_jpg_reflex_surprised;
-  String path_jpg_reflex_happy;
-
-  int upperlid_pivot_x;
-  int upperlid_pivot_y;
-
-  int upperlid_default_pos_x;
-  int upperlid_default_pos_y;
-
-  int upperlid_sad_pos_x;
-  int upperlid_sad_pos_y;
-  int upperlid_sad_theta;
-  int upperlid_angry_pos_x;
-  int upperlid_angry_pos_y;
-  int upperlid_angry_theta;
+  int frame = 0;
+  EyeAsset current_eye_asset;
 
 public:
-
-  const static int max_blink_level = 6;
-  const static int max_surprised_level = 16;
-  const static int max_sleepy_level = 10;
-  const static int max_angry_level = 20;
-  const static int max_sad_level = 20;
-  const static int max_happy_level = 20;
-
   void init(
-          const char *path_jpg_outline,
-          const char *path_jpg_iris,
-          const char *path_jpg_pupil,
-          const char *path_jpg_reflex,
-          const char *path_jpg_upperlid,
-          const char *path_jpg_iris_surprised,
-          const char *path_jpg_pupil_surprised,
-          const char *path_jpg_reflex_surprised,
-          const char *path_jpg_reflex_happy,
+          const EyeAsset& eye_asset,
           const int image_width = 139,
-          const int image_height = 139,
-          const int rotation = 0,
-          const bool invert_rl = false,
-          const int upperlid_pivot_x = 75,
-          const int upperlid_pivot_y = 139,
-          const int upperlid_default_pos_x = 75,
-          const int upperlid_default_pos_y = 7,
-          const int upperlid_sad_pos_x = 100,
-          const int upperlid_sad_pos_y = 40,
-          const int upperlid_sad_theta = 30,
-          const int upperlid_angry_pos_x = 50,
-          const int upperlid_angry_pos_y = 40,
-          const int upperlid_angry_theta = -30
+          const int image_height = 139
           )
   {
     this->image_width = image_width;
     this->image_height = image_height;
-    this->rotation = rotation;
-    this->invert_rl = invert_rl;
-
-    this->path_jpg_outline = path_jpg_outline;
-    this->path_jpg_iris = path_jpg_iris;
-    this->path_jpg_pupil = path_jpg_pupil;
-    this->path_jpg_reflex = path_jpg_reflex;
-    this->path_jpg_upperlid = path_jpg_upperlid;
-    this->path_jpg_iris_surprised = path_jpg_iris_surprised;
-    this->path_jpg_pupil_surprised = path_jpg_pupil_surprised;
-    this->path_jpg_reflex_surprised = path_jpg_reflex_surprised;
-    this->path_jpg_reflex_happy = path_jpg_reflex_happy;
-
-    this->upperlid_pivot_x = upperlid_pivot_x;
-    this->upperlid_pivot_y = upperlid_pivot_y;
-    this->upperlid_default_pos_x = upperlid_default_pos_x;
-    this->upperlid_default_pos_y = upperlid_default_pos_y;
-    this->upperlid_sad_pos_x = upperlid_sad_pos_x;
-    this->upperlid_sad_pos_y = upperlid_sad_pos_y;
-    this->upperlid_sad_theta = upperlid_sad_theta;
-    this->upperlid_angry_pos_x = upperlid_angry_pos_x;
-    this->upperlid_angry_pos_y = upperlid_angry_pos_y;
-    this->upperlid_angry_theta = upperlid_angry_theta;
 
     lcd.init();
-    lcd.setRotation(rotation);
+    lcd.setRotation(eye_asset.direction);
 
     // 目全体を描写するBufferとしてのSpriteを準備
     sprite_eye.createSprite(image_width, image_height);
@@ -137,28 +87,27 @@ public:
 
     // 目の輪郭を描写するSpriteを準備
     sprite_outline.createSprite(image_width, image_height);
-    if (invert_rl) sprite_outline.setRotation(6);
+    if (eye_asset.invert_rl) sprite_outline.setRotation(6);
 
     // 虹彩を描写するSpriteを準備
     sprite_iris.createSprite(image_width, image_height);
-    if (invert_rl) sprite_iris.setRotation(6);
+    if (eye_asset.invert_rl) sprite_iris.setRotation(6);
 
     // 瞳孔を描写するSpriteを準備
     sprite_pupil.createSprite(image_width, image_height);
-    if (invert_rl) sprite_pupil.setRotation(6);
+    if (eye_asset.invert_rl) sprite_pupil.setRotation(6);
 
     // 光の反射を描画するSpriteを準備
     sprite_reflex.createSprite(image_width, image_height);
-    if (invert_rl) sprite_reflex.setRotation(6);
+    if (eye_asset.invert_rl) sprite_reflex.setRotation(6);
 
     // 上瞼を描写するSpriteを準備
     sprite_upperlid.createSprite(image_width, image_height);
-    if (invert_rl) sprite_upperlid.setRotation(6);
-    sprite_upperlid.setPivot(this->upperlid_pivot_x, this->upperlid_pivot_y);
+    if (eye_asset.invert_rl) sprite_upperlid.setRotation(6);
+    sprite_upperlid.setPivot(eye_asset.upperlid_pivot_x, eye_asset.upperlid_pivot_y);
 
-    // Load images
-    this->load_eye_images(path_jpg_outline, path_jpg_iris, path_jpg_pupil,
-            path_jpg_reflex, path_jpg_upperlid);
+    // Load images from default EyeAsset
+    set_emotion(eye_asset);
 
     // lcdを準備
     lcd.setPivot(lcd.width() >> 1, lcd.height() >> 1);
@@ -181,26 +130,24 @@ public:
     bool ret = false;
 
     if (extension == "jpg" || extension == "jpeg") {
-      char log_msg[50];
-      sprintf(log_msg, "loading jpeg: %s", filePath);
-      print_log(log_msg);
-
+#if defined(USE_ROS)
+      nh.logdebug("loading jpeg: %s", filePath);
+#endif
       ret = sprite.drawJpgFile(SPIFFS, filePath);
     } else if (extension == "png") {
-      char log_msg[50];
-      sprintf(log_msg, "loading png: %s", filePath);
-      print_log(log_msg);
-
+#if defined(USE_ROS)
+      nh.logdebug("loading png: %s", filePath);
+#endif
       ret = sprite.drawPngFile(SPIFFS, filePath);
     } else {
-      char log_msg[50];
-      sprintf(log_msg, "invalid image extension %s", filePath);
-      print_log(log_msg);
+#if defined(USE_ROS)
+      nh.logerror("invalid image extension %s", filePath);
+#endif
     }
     if (not ret) {
-      char log_msg[50];
-      sprintf(log_msg, "Failed to load %s", filePath);
-      print_log(log_msg);
+#if defined(USE_ROS)
+      nh.logerror("Failed to load %s", filePath);
+#endif
     }
     return ret;
   }
@@ -210,23 +157,20 @@ public:
   {
     this->look_x = look_x;
     this->look_y = look_y;
-  }
-
-  // まぶたの位置を変更（値を設定するだけ）
-  void set_upperlid_position(float upperlid_y)
-  {
-    this->upperlid_y = upperlid_y;
+#if defined(USE_ROS)
+    nh.loginfo("Look at (%.1f, %.1f)", look_x, look_y);
+#endif
   }
 
   // 目の状態を更新する
-  void load_eye_images(
-          const char *path_jpg_outline,
-          const char *path_jpg_iris,
-          const char *path_jpg_pupil,
-          const char *path_jpg_reflex,
-          const char *path_jpg_upperlid
-          )
+  void load_eye_images()
   {
+    const char *path_jpg_outline = current_eye_asset.path_outline.c_str();
+    const char *path_jpg_iris = current_eye_asset.path_iris.c_str();
+    const char *path_jpg_pupil = current_eye_asset.path_pupil.c_str();
+    const char *path_jpg_reflex = current_eye_asset.path_reflex.c_str();
+    const char *path_jpg_upperlid = current_eye_asset.path_upperlid.c_str();
+
     if (path_jpg_outline != NULL) {
         sprite_outline.fillScreen(TFT_WHITE);
         if (not draw_image_file(sprite_outline, path_jpg_outline)) {
@@ -269,6 +213,10 @@ public:
           int dx_upperlid = 0.0, int dy_upperlid = 0.0, float dtheta_upperlid = 0.0,
           float random_scale = 5.0)
   {
+#if defined(USE_ROS)
+    nh.logdebug("[update_look] dx: %.1f, dy: %.1f, dx_upperlid: %d, dy_upperlid: %d, dtheta_upperlid: %d, random_scale: %.1f", dx, dy, dx_upperlid, dy_upperlid, dtheta_upperlid, random_scale);
+#endif
+
     long rx = (int)(random_scale * random(100) / 100);
     long ry = (int)(random_scale * random(100) / 100);
 
@@ -279,9 +227,10 @@ public:
     sprite_pupil.pushSprite(&sprite_eye, dx, dy, TFT_WHITE); // 瞳孔をランダムに動かす
     sprite_reflex.pushSprite(&sprite_eye, dx + rx, dy + ry, TFT_WHITE); // 光の反射をランダムに動かす
     sprite_upperlid.pushRotateZoom(&sprite_eye,
-            this->upperlid_default_pos_x + dx_upperlid,
-            this->upperlid_default_pos_y + dy_upperlid,
-            dtheta_upperlid, 1.0, 1.0, TFT_WHITE); 
+            current_eye_asset.upperlid_default_pos_x + dx_upperlid,
+            current_eye_asset.upperlid_default_pos_y + dy_upperlid,
+            current_eye_asset.upperlid_default_theta + dtheta_upperlid,
+            1.0, 1.0, TFT_WHITE);
 
     draw_updated_image();
   }
@@ -289,5 +238,26 @@ public:
   void draw_updated_image()
   {
     sprite_eye.pushRotateZoom(&lcd, lcd.width() >> 1, lcd.height() >> 1, 0, zoom_ratio, zoom_ratio);
+  }
+
+  void set_emotion(EyeAsset asset) {
+    current_eye_asset = asset;
+    load_eye_images();
+  }
+
+  std::string get_emotion() {
+    return current_eye_asset.name;
+  }
+
+  int update_emotion() {
+    float upperlid_y;
+    if (current_eye_asset.upperlid_position.size() > 0) {
+      upperlid_y = current_eye_asset.upperlid_position[frame % current_eye_asset.upperlid_position.size()];
+    }else{
+      upperlid_y = 0;
+    }
+    update_look(look_x, look_y, 0, upperlid_y);  // dx, dy, dx_upperlid, dy_upperlid, dtheta_upperlid
+    frame ++;
+    return frame;
   }
 };

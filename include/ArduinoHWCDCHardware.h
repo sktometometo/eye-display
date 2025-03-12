@@ -1,3 +1,4 @@
+#pragma once
 #include <Arduino.h>  // Arduino 1.0
 
 #define SERIAL_CLASS HWCDC

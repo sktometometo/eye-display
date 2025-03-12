@@ -1,0 +1,66 @@
+names: [normal, blink, sleepy, sad, troubled, delighted, heart, shine1, shine2, boring, regret1, regret2, serious]
+normal: '{path_iris: "/krmt_iris_normal.png",
+          path_pupil: "/white.jpg",
+          path_reflex: "/krmt_reflex_normal.png",
+          path_upperlid: "/krmt_upperlid_normal.png",
+          upperlid_position: [9]}'
+blink: '{path_iris: "/krmt_iris_normal.png",
+         path_pupil: "/white.jpg",
+         path_reflex: "/krmt_reflex_normal.png",
+         path_upperlid: "/krmt_upperlid_normal.png",
+         upperlid_position: [9, 9, 130, 130, 9, 9]}'
+sleepy: '{path_iris: "/krmt_iris_normal.png",
+          path_pupil: "/white.jpg",
+          path_reflex: "/krmt_reflex_normal.png",
+          path_upperlid: "/krmt_upperlid_normal.png",
+          upperlid_position: [60, 60, 70, 130, 130, 130, 70, 60, 60, 60]}'
+sad: '{path_iris: "/krmt_iris_normal.png",
+       path_pupil: "/white.jpg",
+       path_reflex: "/krmt_reflex_normal.png",
+       path_upperlid: "/krmt_upperlid_sad.png",
+       upperlid_position: [130]}'
+troubled: '{path_iris: "/krmt_iris_normal.png",
+            path_pupil: "/white.jpg",
+            path_reflex: "/krmt_reflex_troubled.png",
+            path_upperlid: "/white.jpg",
+            upperlid_position: [9, 9, 130, 130, 9, 9]}'
+delighted: '{path_iris: "/krmt_upperlid_normal.png",
+             path_pupil: "/white.jpg",
+             path_reflex: "/krmt_reflex_delighted.png",
+             path_upperlid: "/white.jpg",
+             upperlid_position: [130]}'
+heart: '{path_iris: "/krmt_iris_normal.png",
+         path_pupil: "/white.jpg",
+         path_reflex: "/krmt_reflex_heart.png",
+         path_upperlid: "/krmt_upperlid_normal.png",
+         upperlid_position: [9, 9, 130, 130, 9, 9]}'
+shine1: '{path_iris: "/krmt_iris_normal.png",
+          path_pupil: "/white.jpg",
+          path_reflex: "/krmt_reflex_shine1.png",
+          path_upperlid: "/krmt_upperlid_normal.png",
+          upperlid_position: [9, 9, 130, 130, 9, 9]}'
+shine2: '{path_iris: "/krmt_iris_normal.png",
+          path_pupil: "/white.jpg",
+          path_reflex: "/krmt_reflex_shine2.png",
+          path_upperlid: "/krmt_upperlid_normal.png",
+          upperlid_position: [9, 9, 130, 130, 9, 9]}'
+boring: '{path_iris: "/krmt_upperlid_normal.png",
+          path_pupil: "/white.jpg",
+          path_reflex: "/krmt_reflex_boring.png",
+          path_upperlid: "/white.jpg",
+          upperlid_position: [130]}'
+regret1: '{path_iris: "/krmt_upperlid_normal.png",
+          path_pupil: "/white.jpg",
+          path_reflex: "/krmt_reflex_regret1.png",
+          path_upperlid: "/white.jpg",
+          upperlid_position: [130]}'
+regret2: '{path_iris: "/krmt_upperlid_normal.png",
+           path_pupil: "/white.jpg",
+           path_reflex: "/krmt_reflex_regret2.png",
+           path_upperlid: "/white.jpg",
+           upperlid_position: [130]}'
+serious: '{path_iris: "/krmt_iris_normal.png",
+           path_pupil: "/white.jpg",
+           path_reflex: "/krmt_reflex_normal.png",
+           path_upperlid: "/krmt_upperlid_serious.png",
+           upperlid_position: [130]}'
