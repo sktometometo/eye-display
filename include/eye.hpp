@@ -16,7 +16,7 @@ struct EyeAsset {
  std::string path_pupil = "/pupil.jpg";        //  move along with iris
  std::string path_reflex = "/reflex.jpg" ;     //  move along with puppil + random motion
  std::string path_upperlid = "/upperlid.jpg";  // use upperlid_position_map to set y-axis motoin
- std::vector<float> upperlid_position = {0};   // upperlid = motion layer
+ std::vector<int> upperlid_position = {0};   // upperlid = motion layer
  int direction = 0;
  bool invert_rl = false;
  int upperlid_pivot_x = 75;
