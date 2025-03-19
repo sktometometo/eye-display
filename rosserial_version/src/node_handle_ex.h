@@ -44,6 +44,16 @@ public:
       return false;
     }
   }
+  bool getParam(const char *name, std::vector<int> &param, int timeout = 1000)
+  {
+      if (!super::requestParam(name, timeout))
+          return false;
+      param.resize(super::req_param_resp.ints_length);
+      // copy it over
+      for (int i = 0; i < super::req_param_resp.ints_length; i++)
+          param[i] = super::req_param_resp.ints[i];
+      return true;
+  }
 
 #define def_char_log_formatter(funcname)                        \
   void funcname(const char *format, ...) {                      \

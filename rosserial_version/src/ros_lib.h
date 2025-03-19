@@ -68,11 +68,8 @@ void setup_asset()  // returns initial status
   // get eye_asset_names from rosParam
   std::vector<std::string> eye_asset_names;
   nh.getParam("~eye_asset/names", eye_asset_names);
-  if (eye_asset_names.size() > 0) {
-    std::ostringstream oss;
-    std::copy(eye_asset_names.begin(), eye_asset_names.end(), std::ostream_iterator<std::string>(oss, ", "));
-    std::string result = oss.str(); result.pop_back(); result.pop_back();  // remove last ","
-    nh.loginfo("Read rosparam : ~eye_asset/names is [%s]", result.c_str());
+  for (int i=0; i<eye_asset_names.size(); i++) {
+    nh.loginfo("~eye_asset/names[%d]: %s", i, eye_asset_names[i].c_str());
   }
   // initialize eye_asset_map from eye_asset_names
   for(auto name: eye_asset_names) {
@@ -82,48 +79,35 @@ void setup_asset()  // returns initial status
     eye_asset_map[name].invert_rl = not mode_right;
   }
   for(auto name: eye_asset_names) {
-    char eye_asset_map_key[128];
-    sprintf(eye_asset_map_key, "~eye_asset/%s", name.c_str());
-    std::string eye_asset_map_params;
-    nh.getParam(eye_asset_map_key, eye_asset_map_params);
-    nh.loginfo("Read rosparam : %s is %s", eye_asset_map_key, eye_asset_map_params.c_str());
-    StaticJsonDocument<2049> eye_asset_map_doc;
-    deserializeJson(eye_asset_map_doc, eye_asset_map_params.c_str());
-
     EyeAsset *asset = &(eye_asset_map[name]);
-    if ( eye_asset_map_doc["path_upperlid"] ) {
-      asset->path_upperlid = std::string(eye_asset_map_doc["path_upperlid"].as<const char*>());
-    }
-    if ( eye_asset_map_doc["path_outline"] ) {
-      asset->path_outline = std::string(eye_asset_map_doc["path_outline"].as<const char*>());
-    }
-    if ( eye_asset_map_doc["path_iris"] ) {
-      asset->path_iris = std::string(eye_asset_map_doc["path_iris"].as<const char*>());
-    }
-    if ( eye_asset_map_doc["path_pupil"] ) {
-      asset->path_pupil = std::string(eye_asset_map_doc["path_pupil"].as<const char*>());
-    }
-    if ( eye_asset_map_doc["path_reflex"] ) {
-      asset->path_reflex = std::string(eye_asset_map_doc["path_reflex"].as<const char*>());
-    }
-    // read array
-    JsonArray arr_pos = eye_asset_map_doc["upperlid_position"].as<JsonArray>();
-    if ( arr_pos.size() > 0 ) {
-      asset->upperlid_position.resize(0);
-      for (JsonVariant value : arr_pos) {
-        asset->upperlid_position.push_back(value.as<float>());
-      }
-    }
-    // read default_positoin
-    if (eye_asset_map_doc["upperlid_default_pos_x"] ) {
-      asset->upperlid_default_pos_x = eye_asset_map_doc["upperlid_default_pos_x"].as<int>();
-    }
-    if (eye_asset_map_doc["upperlid_default_pos_y"] ) {
-      asset->upperlid_default_pos_y = eye_asset_map_doc["upperlid_default_pos_y"].as<int>();
-    }
-    if (eye_asset_map_doc["upperlid_default_theta"] ) {
-      asset->upperlid_default_theta = eye_asset_map_doc["upperlid_default_theta"].as<float>();
-    }
+    char eye_asset_map_key[128];
+    // path_upperlid
+    snprintf(eye_asset_map_key, sizeof(eye_asset_map_key), "~eye_asset/%s/path_upperlid", name.c_str());
+    nh.getParam(eye_asset_map_key, asset->path_upperlid);
+    // path_outline
+    snprintf(eye_asset_map_key, sizeof(eye_asset_map_key), "~eye_asset/%s/path_outline", name.c_str());
+    nh.getParam(eye_asset_map_key, asset->path_outline);
+    // path_iris
+    snprintf(eye_asset_map_key, sizeof(eye_asset_map_key), "~eye_asset/%s/path_iris", name.c_str());
+    nh.getParam(eye_asset_map_key, asset->path_iris);
+    // path_pupil
+    snprintf(eye_asset_map_key, sizeof(eye_asset_map_key), "~eye_asset/%s/path_pupil", name.c_str());
+    nh.getParam(eye_asset_map_key, asset->path_pupil);
+    // path_reflex
+    snprintf(eye_asset_map_key, sizeof(eye_asset_map_key), "~eye_asset/%s/path_reflex", name.c_str());
+    nh.getParam(eye_asset_map_key, asset->path_reflex);
+    // upperlid_position
+    snprintf(eye_asset_map_key, sizeof(eye_asset_map_key), "~eye_asset/%s/upperlid_position", name.c_str());
+    nh.getParam(eye_asset_map_key, asset->upperlid_position);
+    // upperlid_default_pos_x
+    snprintf(eye_asset_map_key, sizeof(eye_asset_map_key), "~eye_asset/%s/upperlid_default_pos_x", name.c_str());
+    nh.getParam(eye_asset_map_key, &(asset->upperlid_default_pos_x));
+    // upperlid_default_pos_y
+    snprintf(eye_asset_map_key, sizeof(eye_asset_map_key), "~eye_asset/%s/upperlid_default_pos_y", name.c_str());
+    nh.getParam(eye_asset_map_key, &(asset->upperlid_default_pos_y));
+    // upperlid_default_theta
+    snprintf(eye_asset_map_key, sizeof(eye_asset_map_key), "~eye_asset/%s/upperlid_default_theta", name.c_str());
+    nh.getParam(eye_asset_map_key, &(asset->upperlid_default_theta));
   }
 
   // display map data
