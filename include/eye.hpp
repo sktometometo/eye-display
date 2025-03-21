@@ -23,7 +23,7 @@ struct EyeAsset {
  int upperlid_pivot_y = 139;
  int upperlid_default_pos_x = 75;
  int upperlid_default_pos_y = 7;
- float upperlid_default_theta = 0;
+ int upperlid_default_theta = 0;
 };
 
 #if defined(STAMPS3)
@@ -36,13 +36,6 @@ struct EyeAsset {
 #include "ArduinoHWCDCHardware.h"
 #elif defined(STAMPC3)
 #include "ArduinoHardware.h"
-#endif
-
-#if defined(USE_ROS)
-
-#include "node_handle_ex.h"  // #include "ros/node_handle.h"
-extern ros::NodeHandleEx<ArduinoHardware> nh;
-
 #endif
 
 class EyeManager
@@ -59,27 +52,56 @@ private:
   LGFX_Sprite sprite_upperlid;
 
   float zoom_ratio;
-  int image_width;
-  int image_height;
+  int image_width = 139;
+  int image_height = 139;
 
   float look_x = 0.0f;
-  float look_y = 0.0f;
+  float look_y = 0.2f;
 
   int frame = 0;
-  EyeAsset current_eye_asset;
 
+  virtual void logdebug(const char *fmt, ...) = 0;
+  virtual void loginfo(const char *fmt, ...) = 0;
+  virtual void logwarn(const char *fmt, ...) = 0;
+  virtual void logerror(const char *fmt, ...) = 0;
+  virtual void logfatal(const char *fmt, ...) = 0;
+
+  void load_eye_images();
+  bool draw_image_file(LGFX_Sprite& sprite, const char* filePath);
+
+  std::string current_eye_asset_name;
 public:
-  void init(
-          const EyeAsset& eye_asset,
+  std::map<std::string, EyeAsset> eye_asset_map;
+
+  EyeManager();
+
+  void init(const int image_width, const int image_height);
+  void set_gaze_direction(float look_x, float look_y);
+  void set_emotion(const std::string eye_status_name);
+  std::string get_emotion();
+  int update_emotion();
+  void update_look(float dx, float dy,
+                   int dx_upperlid, int dy_upperlid, float dtheta_upperlid,
+                   float random_scale);
+};
+
+
+EyeManager::EyeManager()
+{
+  eye_asset_map = {std::map<std::string, EyeAsset>::value_type("default", EyeAsset())};
+  current_eye_asset_name = "default";
+}
+
+void EyeManager::init(
           const int image_width = 139,
           const int image_height = 139
           )
-  {
+{
+    EyeAsset& current_eye_asset = eye_asset_map[current_eye_asset_name];
     this->image_width = image_width;
     this->image_height = image_height;
-
     lcd.init();
-    lcd.setRotation(eye_asset.direction);
+    lcd.setRotation(current_eye_asset.direction);
 
     // 目全体を描写するBufferとしてのSpriteを準備
     sprite_eye.createSprite(image_width, image_height);
@@ -87,27 +109,27 @@ public:
 
     // 目の輪郭を描写するSpriteを準備
     sprite_outline.createSprite(image_width, image_height);
-    if (eye_asset.invert_rl) sprite_outline.setRotation(6);
+    if (current_eye_asset.invert_rl) sprite_outline.setRotation(6);
 
     // 虹彩を描写するSpriteを準備
     sprite_iris.createSprite(image_width, image_height);
-    if (eye_asset.invert_rl) sprite_iris.setRotation(6);
+    if (current_eye_asset.invert_rl) sprite_iris.setRotation(6);
 
     // 瞳孔を描写するSpriteを準備
     sprite_pupil.createSprite(image_width, image_height);
-    if (eye_asset.invert_rl) sprite_pupil.setRotation(6);
+    if (current_eye_asset.invert_rl) sprite_pupil.setRotation(6);
 
     // 光の反射を描画するSpriteを準備
     sprite_reflex.createSprite(image_width, image_height);
-    if (eye_asset.invert_rl) sprite_reflex.setRotation(6);
+    if (current_eye_asset.invert_rl) sprite_reflex.setRotation(6);
 
     // 上瞼を描写するSpriteを準備
     sprite_upperlid.createSprite(image_width, image_height);
-    if (eye_asset.invert_rl) sprite_upperlid.setRotation(6);
-    sprite_upperlid.setPivot(eye_asset.upperlid_pivot_x, eye_asset.upperlid_pivot_y);
+    if (current_eye_asset.invert_rl) sprite_upperlid.setRotation(6);
+    sprite_upperlid.setPivot(current_eye_asset.upperlid_pivot_x, current_eye_asset.upperlid_pivot_y);
 
     // Load images from default EyeAsset
-    set_emotion(eye_asset);
+    //////////////////////////set_emotion(current_eye_asset);
 
     // lcdを準備
     lcd.setPivot(lcd.width() >> 1, lcd.height() >> 1);
@@ -121,50 +143,43 @@ public:
     {
       zoom_ratio = ztmp;
     }
-  }
 
-  bool draw_image_file(LGFX_Sprite& sprite, const char* filePath)
-  {
+    set_emotion(current_eye_asset.name);
+}
+
+bool EyeManager::draw_image_file(LGFX_Sprite& sprite, const char* filePath)
+{
     std::string pathStr(filePath);
     std::string extension = pathStr.substr(pathStr.find_last_of('.') + 1);
     bool ret = false;
 
     if (extension == "jpg" || extension == "jpeg") {
-#if defined(USE_ROS)
-      nh.logdebug("loading jpeg: %s", filePath);
-#endif
+      logdebug("loading jpeg: %s", filePath);
       ret = sprite.drawJpgFile(SPIFFS, filePath);
     } else if (extension == "png") {
-#if defined(USE_ROS)
-      nh.logdebug("loading png: %s", filePath);
-#endif
+      logdebug("loading png: %s", filePath);
       ret = sprite.drawPngFile(SPIFFS, filePath);
     } else {
-#if defined(USE_ROS)
-      nh.logerror("invalid image extension %s", filePath);
-#endif
+      logerror("invalid image extension %s", filePath);
     }
     if (not ret) {
-#if defined(USE_ROS)
-      nh.logerror("Failed to load %s", filePath);
-#endif
+      logerror("Failed to load %s", filePath);
     }
     return ret;
-  }
+}
 
    // 視線方向を変更（値を設定するだけ）
-  void set_gaze_direction(float look_x, float look_y)
-  {
+void EyeManager::set_gaze_direction(float look_x, float look_y)
+{
     this->look_x = look_x;
     this->look_y = look_y;
-#if defined(USE_ROS)
-    nh.loginfo("Look at (%.1f, %.1f)", look_x, look_y);
-#endif
-  }
+    loginfo("Look at (%.1f, %.1f)", look_x, look_y);
+}
 
-  // 目の状態を更新する
-  void load_eye_images()
+// 目の状態を更新する
+void EyeManager::load_eye_images()
   {
+    EyeAsset& current_eye_asset = eye_asset_map[current_eye_asset_name];
     const char *path_jpg_outline = current_eye_asset.path_outline.c_str();
     const char *path_jpg_iris = current_eye_asset.path_iris.c_str();
     const char *path_jpg_pupil = current_eye_asset.path_pupil.c_str();
@@ -208,14 +223,13 @@ public:
     }
   }
 
-  // 通常の目の描画
-  void update_look(float dx = 0.0, float dy = 0.0,
+// 通常の目の描画
+void EyeManager::update_look(float dx = 0.0, float dy = 0.0,
           int dx_upperlid = 0.0, int dy_upperlid = 0.0, float dtheta_upperlid = 0.0,
           float random_scale = 5.0)
-  {
-#if defined(USE_ROS)
-    nh.logdebug("[update_look] dx: %.1f, dy: %.1f, dx_upperlid: %d, dy_upperlid: %d, dtheta_upperlid: %d, random_scale: %.1f", dx, dy, dx_upperlid, dy_upperlid, dtheta_upperlid, random_scale);
-#endif
+{
+    EyeAsset& current_eye_asset = eye_asset_map[current_eye_asset_name];
+    logdebug("[update_look] dx: %.1f, dy: %.1f, dx_upperlid: %d, dy_upperlid: %d, dtheta_upperlid: %d, random_scale: %.1f", dx, dy, dx_upperlid, dy_upperlid, dtheta_upperlid, random_scale);
 
     long rx = (int)(random_scale * random(100) / 100);
     long ry = (int)(random_scale * random(100) / 100);
@@ -232,24 +246,30 @@ public:
             current_eye_asset.upperlid_default_theta + dtheta_upperlid,
             1.0, 1.0, TFT_WHITE);
 
-    draw_updated_image();
-  }
-
-  void draw_updated_image()
-  {
     sprite_eye.pushRotateZoom(&lcd, lcd.width() >> 1, lcd.height() >> 1, 0, zoom_ratio, zoom_ratio);
-  }
+}
 
-  void set_emotion(EyeAsset asset) {
-    current_eye_asset = asset;
-    load_eye_images();
+void EyeManager::set_emotion(const std::string eye_status_name) {
+  auto it = eye_asset_map.find(eye_status_name);
+  if (it == eye_asset_map.end()) {
+    logerror("Unknown eye_asset status name %s", eye_status_name.c_str());
+    logerror("possible status are");
+    for(auto & eye_asset: eye_asset_map) {
+      logerror("... [%s]", eye_asset.first.c_str());
+    }
+    return;
   }
+  current_eye_asset_name = it->first;
+  loginfo("Status updated: %s", it->first.c_str());
+  load_eye_images();
+}
 
-  std::string get_emotion() {
-    return current_eye_asset.name;
-  }
+std::string EyeManager::get_emotion() {
+  return current_eye_asset_name;
+}
 
-  int update_emotion() {
+int EyeManager::update_emotion() {
+    EyeAsset& current_eye_asset = eye_asset_map[current_eye_asset_name];
     float upperlid_y;
     if (current_eye_asset.upperlid_position.size() > 0) {
       upperlid_y = current_eye_asset.upperlid_position[frame % current_eye_asset.upperlid_position.size()];
@@ -259,5 +279,17 @@ public:
     update_look(look_x, look_y, 0, upperlid_y);  // dx, dy, dx_upperlid, dy_upperlid, dtheta_upperlid
     frame ++;
     return frame;
-  }
+}
+
+#if !defined(USE_I2C) && !defined(USE_ROS) // sample code for eye asset without ROS/I2C
+class EyeManagerIO: public EyeManager
+{
+public:
+  EyeManagerIO() : EyeManager() {}
+  void logdebug(const char *fmt, ...) { } // should be implemented in EyeManagerIO class
+  void loginfo(const char *fmt, ...) { } // should be implemented in EyeManagerIO class
+  void logwarn(const char *fmt, ...) { } // should be implemented in EyeManagerIO class
+  void logerror(const char *fmt, ...) { } // should be implemented in EyeManagerIO class
+  void logfatal(const char *fmt, ...) { } // should be implemented in EyeManagerIO class
 };
+#endif

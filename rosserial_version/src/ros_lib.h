@@ -4,14 +4,6 @@
 #include <iterator>
 #include <sstream>
 
-extern const int image_width;
-extern const int image_height;
-
-extern EyeManager eye;
-extern std::map<std::string, EyeAsset> eye_asset_map;
-extern std::string current_eye_status;
-
-
 #include "node_handle_ex.h"  // #include "ros/node_handle.h"
 #include "geometry_msgs/Point.h"
 #include "std_msgs/String.h"
@@ -20,34 +12,46 @@ void callback_look_at(const geometry_msgs::Point &msg);
 void callback_emotion(const std_msgs::String &msg);
 
 ros::NodeHandleEx<ArduinoHardware> nh;
+
+class EyeManagerIO : public EyeManager {
+public:
+  EyeManagerIO() : EyeManager() {}
+
+#define def_eye_manager_log_func(funcname)                \
+  void funcname(const char *fmt, ...) override {          \
+    char *string;                                         \
+    va_list args;                                         \
+    va_start(args, fmt);                                  \
+    if (0 > vasprintf(&string, fmt, args)) string = NULL; \
+    va_end(args);                                         \
+    if (string) {                                         \
+      nh.funcname(string);                                \
+      free(string);                                       \
+    }                                                     \
+  }
+  def_eye_manager_log_func(logdebug);
+  def_eye_manager_log_func(loginfo);
+  def_eye_manager_log_func(logwarn);
+  def_eye_manager_log_func(logerror);
+  def_eye_manager_log_func(logfatal);
+};
+
+extern EyeManagerIO eye;
+
 ros::Subscriber<geometry_msgs::Point> sub_point("~look_at", &callback_look_at);
 ros::Subscriber<std_msgs::String> sub_eye_status("~eye_status", &callback_emotion);
-
 void callback_look_at(const geometry_msgs::Point &msg)
 {
   eye.set_gaze_direction((float)msg.x, (float)msg.y);
 }
-
 void callback_emotion(const std_msgs::String &msg)
 {
-  int i = 0;
-  current_eye_status = std::string(msg.data);
-  auto it = eye_asset_map.find(current_eye_status);
-  if (it != eye_asset_map.end()) {
-      nh.loginfo("Status updated: %s", msg.data);
-      eye.set_emotion(it->second);
-  } else {
-    nh.logerror("~eye_status received unknown status %s", msg.data);
-    std::ostringstream oss;
-    nh.logerror("possible status are ..");
-    for(auto & eye_asset: eye_asset_map) {
-      nh.logerror("possible status are [%s]", eye_asset.first.c_str());
-    }
-  }
+  eye.set_emotion(msg.data);
 }
 
-void setup_asset()  // returns initial status
+void setup_asset(EyeManager& eye)
 {
+  std::map<std::string, EyeAsset>& eye_asset_map = eye.eye_asset_map;
   while (not nh.connected())
   {
     nh.spinOnce();
@@ -133,11 +137,9 @@ void setup_asset()  // returns initial status
   }
   // eyeの初期化
   if ( eye_asset_names.size() > 0 ) {
-    current_eye_status = eye_asset_names[0];
+    eye.set_emotion(eye_asset_names[0]);
   } else {
-    current_eye_status = std::string("default");
-    eye_asset_map[current_eye_status] = EyeAsset();
-    nh.logerror("Faile to initialize emotion, use default asset");
+    nh.logwarn("Faile to initialize emotion, use default asset");
   }
 }
 
@@ -149,14 +151,14 @@ void setup_ros()
   nh.spinOnce();
 }
 
-void reconnect_ros()
+void reconnect_ros(EyeManager &eye)
 {
   while (not nh.connected())
   {
-    // reconnected to PC node, try to get rosparam
     nh.spinOnce();
     delay(1000);
-    setup_asset();
-    eye.init(eye_asset_map[current_eye_status], image_width, image_height);
+    // when ROS node is re-connected, get rosparam again
+    setup_asset(eye);
+    eye.init();
   }
 }
