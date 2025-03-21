@@ -18,6 +18,7 @@ public:
     return super::getParam(name, param, length, timeout);
   }
   bool getParam(const char* name, float* param, int length = 1, int timeout = 1000) {
+    logwarn("Failed to get param: length mismatch float");
     return super::getParam(name, param, length, timeout);
   }
   bool getParam(const char* name, char** param, int length = 1, int timeout = 1000) {
@@ -40,6 +41,7 @@ public:
       param = std::string(super::req_param_resp.strings[0]);
       return true;
     } else {
+      logwarn("Failed to get param: length mismatch std::string");
       logwarn("Failed to get param: length mismatch");
       return false;
     }
@@ -60,7 +62,7 @@ public:
     char *string;                                               \
     va_list args;                                               \
     va_start(args, format);                                     \
-    if (0 > vasprintf(&string, format, args)) string == NULL;   \
+    if (0 > vasprintf(&string, format, args)) string = NULL;    \
     va_end(args);                                               \
     if(string) {                                                \
       super::funcname(string);                                  \
