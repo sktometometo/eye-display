@@ -3,6 +3,9 @@
 [![PlatformIO Build Workflow](https://github.com/sktometometo/eye-display/actions/workflows/main.yml/badge.svg)](https://github.com/sktometometo/eye-display/actions/workflows/main.yml)
 [![Cakin Build and PlatformIO Build Workflow](https://github.com/sktometometo/eye-display/actions/workflows/full.yml/badge.svg)](https://github.com/sktometometo/eye-display/actions/workflows/full.yml)
 
+
+**THIS REPO HAS BEEN MOVED TO [jsk_3rdparty](https://github.com/jsk-ros-pkg/jsk_3rdparty/pull/522). So Please use it**
+
 https://github.com/user-attachments/assets/e2b44bc5-4f85-489f-b862-e851fd4cdf32
 
 Eye Display Module
